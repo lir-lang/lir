@@ -1,0 +1,43 @@
+#load[stdio];
+
+alias io = std::io; // Rename namespace in current scope.
+
+
+
+// Add numbers and print to stderr.
+fn func(a, b: int): int {
+	ret a + b;
+}
+
+let ans: int = func(12, 24);
+io::errln(ans * 2);
+
+
+
+// Print a string.
+let my_str: str = "Hello World!";
+io::println(my_str);
+
+
+
+// Generators.
+// function ptr => fn(int, int): int;
+
+error EndOfIter;
+
+fn range(start, end: int) fn(void)int {
+	fn next() int? {
+		if (start < end) {
+			ret start++;
+		}
+
+		ret EndOfIter;
+	}
+
+	ret next;
+}
+
+
+for (i: int? in range(0, 10)) {
+	io::print(r(), " ", r());
+}
