@@ -31,6 +31,9 @@
 *.out
 *.app
 
+callgrind.out*
+cachgrind.out*
+
 
 tests/
 build/

@@ -3,32 +3,43 @@
 
 #include <cstdint>
 #include <string_view>
+#include <string>
 #include <variant>
 #include <iostream>
 
 
 namespace lir {
 
-	template <typename T>
 	struct View {
-		const T* ptr;
-		uint8_t length;
+		const char* ptr;
+		const char* end;
 
 
-		View(): ptr(nullptr), length(0) {}
-		View(const T* s): ptr(s), length(1) {}
-		View(const T* s, uint8_t p): ptr(s), length(p) {}
+		View() = default;
+
+		// View()
+		// 	: ptr(nullptr), end(nullptr) {}
+
+		View(const std::string& str)
+			: ptr(str.c_str()), end(ptr + str.size()) {}
+
+		View(const char* s)
+			: ptr(s), end(ptr + 1) {}
+
+		View(const char* s, const char* p)
+			: ptr(s), end(p) {}
+
+
+
+		bool remaining() {
+			return ptr != end;
+		}
 	};
-
-
-	using StrView = View<char>;
 }
 
 
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const lir::View<T>& v) {
-	os << std::string_view{v.ptr, v.length};
-
+std::ostream& operator<<(std::ostream& os, const lir::View& v) {
+	os << std::string_view{v.ptr, static_cast<std::string_view::size_type>(v.end - v.ptr)};
 	return os;
 }

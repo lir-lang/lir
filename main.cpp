@@ -2,6 +2,7 @@
 #include <vector>
 #include <iomanip>
 #include <unordered_map>
+#include <algorithm>
 
 #include <util/util.hpp>
 #include <structures/structures.hpp>
@@ -52,11 +53,11 @@ int main(int argc, const char* argv[]) {
 
 
 
-	lir::Iter iter{input.c_str(), input};
+	lir::View view{input};
 
 	lir::Token tok;
 	while (lir::remaining(tok)) {
-		tok = lir::lexer::advance(iter, lir::lexer::lexer_callback);
+		tok = lir::lexer::advance(view, lir::lexer::lexer_callback);
 		// std::cerr << tok << '\n';
 	}
 
@@ -65,6 +66,32 @@ int main(int argc, const char* argv[]) {
 	auto end_total = timer::now();
 
 
+
+	if constexpr(false) {
+		view = lir::View{input};
+
+		std::unordered_map<uint8_t, int> freq;
+		lir::Token tok;
+
+		while (lir::remaining(tok)) {
+			tok = lir::lexer::advance(view, lir::lexer::lexer_callback);
+			freq[tok.type]++;
+		}
+
+		std::vector<std::pair<uint8_t, int>> sorted;
+
+		std::copy(
+			freq.begin(), freq.end(),
+			std::back_inserter(sorted)
+		);
+
+		std::sort(sorted.begin(), sorted.end(), [] (auto a, auto b) {
+			return a.second > b.second;
+		});
+
+		for (const auto& [type, val]: sorted)
+			std::cerr << lir::TokenType::to_str[type] << ", " << val << '\n';
+	}
 
 
 
@@ -99,7 +126,7 @@ int main(int argc, const char* argv[]) {
 
 		lir::println();
 
-		lir::noticeln_em("input     ", " | ", fmt_num_str(input.size()), " B");
+		lir::noticeln_em("input | ", fmt_num_str(input.size()), " B");
 		lir::println();
 
 	} else {

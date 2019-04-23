@@ -138,12 +138,12 @@ namespace lir {
 
 	struct Token {
 		uint8_t type;
-		lir::StrView val;
+		lir::View val;
 
 
 		Token(): type(lir::SpecialTokenType::Empty) {}
 		Token(uint8_t t): type(t) {}
-		Token(uint8_t t, lir::StrView v)
+		Token(uint8_t t, const lir::View& v)
 			: type(t), val(v)
 		{
 

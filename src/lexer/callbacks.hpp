@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <structures/token.hpp>
-#include <structures/iter.hpp>
+#include <structures/view.hpp>
 
 
 namespace lir::lexer {
@@ -12,20 +12,20 @@ namespace lir::lexer {
 
 
 
-	#define HANDLE(f) return lir::lexer::f(iter);
+	#define HANDLE(f) return lir::lexer::f(view);
 	#define TOKEN(t) return {Type::t};
 	#define TOKENVAL(t,v) return {Type::t,v};
-	#define TOKENMATCH(a,b) return (lir::lexer::match(iter, '=') ? lir::Token{Type::a} : lir::Token{Type::b});
+	#define TOKENMATCH(a,b) return (lir::lexer::match(view, '=') ? lir::Token{Type::a} : lir::Token{Type::b});
 
 
 
 
-	lir::Token on_char(lir::Iter& iter) {
-		++iter;
+	lir::Token on_char(lir::View& view) {
+		++view.ptr;
 
-		const char* chr = iter;
+		auto chr = view.ptr;
 
-		if (lir::lexer::match(iter, '\''))
+		if (lir::lexer::match(view, '\''))
 			TOKENVAL(Char, chr)
 
 		lir::errorln("Unterminated char literal.");
@@ -34,34 +34,33 @@ namespace lir::lexer {
 	}
 
 
-	lir::Token on_string(lir::Iter& iter) {
-		++iter;
+	lir::Token on_string(lir::View& view) {
+		++view.ptr;
 
-		auto str = lir::lexer::read_while(iter, [] (auto current) {
-			return (current + 1) != '"';
+		auto str = lir::lexer::read_while(view, [] (auto c) {
+			return (*c) != '"';
 		});
 
-		++iter;
+		++view.ptr;
 
 		TOKENVAL(String, str)
 	}
 
 
-	lir::Token on_alpha(lir::Iter& iter) {
-		auto ident_reader = [] (auto current) {
-			auto c = current + 1;
-			return lir::lexer::alpha(c) or lir::lexer::digit(c) or c == '_';
+	lir::Token on_alpha(lir::View& view) {
+		auto ident_reader = [] (auto c) {
+			return lir::lexer::alpha(*c) or lir::lexer::digit(*c) or *c == '_';
 		};
 
-		TOKENVAL(Identifier, lir::lexer::read_while(iter, ident_reader))
+		TOKENVAL(Identifier, lir::lexer::read_while(view, ident_reader))
 	}
 
 
-	lir::Token on_num(lir::Iter& iter) {
+	lir::Token on_num(lir::View& view) {
 		TOKENVAL(
 			Number,
-			lir::lexer::read_while(iter, [] (auto current) {
-				return lir::lexer::digit(current + 1);
+			lir::lexer::read_while(view, [] (auto c) {
+				return lir::lexer::digit(*c);
 			})
 		)
 	}
@@ -72,11 +71,11 @@ namespace lir::lexer {
 
 
 
-	lir::Token on_plus(lir::Iter& iter) {
-		if (lir::lexer::match(iter, '='))
+	lir::Token on_plus(lir::View& view) {
+		if (lir::lexer::match(view, '='))
 			TOKEN(Op_PlusEq)
 
-		else if (lir::lexer::match(iter, '+'))
+		else if (lir::lexer::match(view, '+'))
 			TOKEN(Op_Incr)
 
 		else
@@ -84,11 +83,11 @@ namespace lir::lexer {
 	}
 
 
-	lir::Token on_minus(lir::Iter& iter) {
-		if (lir::lexer::match(iter, '='))
+	lir::Token on_minus(lir::View& view) {
+		if (lir::lexer::match(view, '='))
 			TOKEN(Op_MinusEq)
 
-		else if (lir::lexer::match(iter, '-'))
+		else if (lir::lexer::match(view, '-'))
 			TOKEN(Op_Decr)
 
 		else
@@ -96,17 +95,17 @@ namespace lir::lexer {
 	}
 
 
-	lir::Token on_multiply(lir::Iter& iter) {
+	lir::Token on_multiply(lir::View& view) {
 		TOKENMATCH(Op_MultiplyEq, Op_Multiply)
 	}
 
 
-	lir::Token on_divide(lir::Iter& iter) {
+	lir::Token on_divide(lir::View& view) {
 		TOKENMATCH(Op_DivideEq, Op_Divide)
 	}
 
 
-	lir::Token on_mod(lir::Iter& iter) {
+	lir::Token on_mod(lir::View& view) {
 		TOKENMATCH(Op_ModEq, Op_Mod)
 	}
 
@@ -119,17 +118,17 @@ namespace lir::lexer {
 
 
 
-	lir::Token on_ampersand(lir::Iter& iter) {
+	lir::Token on_ampersand(lir::View& view) {
 		TOKENMATCH(Op_AndEq, Op_And)
 	}
 
 
-	lir::Token on_bar(lir::Iter& iter) {
+	lir::Token on_bar(lir::View& view) {
 		TOKENMATCH(Op_OrEq, Op_Or)
 	}
 
 
-	lir::Token on_tilde(lir::Iter& iter) {
+	lir::Token on_tilde(lir::View& view) {
 		TOKENMATCH(Op_NegEq, Op_Neg)
 	}
 
@@ -141,16 +140,16 @@ namespace lir::lexer {
 
 
 
-	lir::Token on_equal(lir::Iter& iter) {
+	lir::Token on_equal(lir::View& view) {
 		TOKENMATCH(Cmp_Eq, Assign)
 	}
 
 
-	lir::Token on_less(lir::Iter& iter) {
-		if (lir::lexer::match(iter, '=')) {
+	lir::Token on_less(lir::View& view) {
+		if (lir::lexer::match(view, '=')) {
 			TOKEN(Cmp_LessEq)
 
-		} else if (lir::lexer::match(iter, '<')) {
+		} else if (lir::lexer::match(view, '<')) {
 			TOKENMATCH(Op_ShiftLeftEq, Op_ShiftLeft)
 
 		} else {
@@ -159,11 +158,11 @@ namespace lir::lexer {
 	}
 
 
-	lir::Token on_more(lir::Iter& iter) {
-		if (lir::lexer::match(iter, '=')) {
+	lir::Token on_more(lir::View& view) {
+		if (lir::lexer::match(view, '=')) {
 			TOKEN(Cmp_MoreEq)
 
-		} else if (lir::lexer::match(iter, '>')) {
+		} else if (lir::lexer::match(view, '>')) {
 			TOKENMATCH(Op_ShiftRightEq, Op_ShiftRight)
 
 		} else {
@@ -185,8 +184,8 @@ namespace lir::lexer {
 
 
 
-	lir::Token on_colon(lir::Iter& iter) {
-		if (lir::lexer::match(iter, ':'))
+	lir::Token on_colon(lir::View& view) {
+		if (lir::lexer::match(view, ':'))
 			TOKEN(Namespace)
 		else
 			TOKEN(Colon)
@@ -194,7 +193,7 @@ namespace lir::lexer {
 
 
 
-	lir::Token on_exclaim(lir::Iter& iter) {
+	lir::Token on_exclaim(lir::View& view) {
 		TOKENMATCH(Cmp_NotEq, Exclaim)
 	}
 
@@ -209,66 +208,82 @@ namespace lir::lexer {
 
 
 	// Handle all callbacks.
-	lir::Token lexer_callback(lir::Iter& iter) {
-		if (lir::lexer::space(iter))
-			return lexer_callback(++iter);
+	lir::Token lexer_callback(lir::View& view) {
 
+		char current = *view.ptr;
 
-		// skip comments
-		else if (iter == '/' and lir::lexer::match(iter, '/')) {
-			lir::lexer::skip_while(iter, [] (auto current) {
-				return current != '\n';
-			});
-
-			return lexer_callback(++iter);
+		if (lir::lexer::space(current)) {
+			++view.ptr;
+			return lexer_callback(view);
 		}
 
 
-		else if (lir::lexer::alpha(iter)) HANDLE(on_alpha)
-		else if (lir::lexer::digit(iter)) HANDLE(on_num)
 
 
-		else if (iter == '"')  HANDLE(on_string)
-		else if (iter == '\'') HANDLE(on_char)
+		else if (lir::lexer::alpha(current)) HANDLE(on_alpha)
+
+		else if (current == '(') TOKEN(ParenLeft)
+		else if (current == ')') TOKEN(ParenRight)
 
 
-		else if (iter == '(') TOKEN(ParenLeft)
-		else if (iter == ')') TOKEN(ParenRight)
-		else if (iter == '{') TOKEN(BraceLeft)
-		else if (iter == '}') TOKEN(BraceRight)
-		else if (iter == '[') TOKEN(BracketLeft)
-		else if (iter == ']') TOKEN(BracketRight)
+		else if (current == ';') TOKEN(Semicolon)
+		else if (current == ',') TOKEN(Comma)
+		else if (current == ':') HANDLE(on_colon)
+
+		// skip comments
+		else if (current == '/' and lir::lexer::match(view, '/')) {
+			lir::lexer::skip_while(view, [] (auto c) {
+				return *(c - 1) != '\n';
+			});
 
 
-		else if (iter == '+') HANDLE(on_plus)
-		else if (iter == '-') HANDLE(on_minus)
-		else if (iter == '*') HANDLE(on_multiply)
-		else if (iter == '/') HANDLE(on_divide)
-		else if (iter == '%') HANDLE(on_mod)
+			++view.ptr;
+			return lexer_callback(view);
+		}
 
-		else if (iter == '&') HANDLE(on_ampersand)
-		else if (iter == '|') HANDLE(on_bar)
-		else if (iter == '~') HANDLE(on_tilde)
+		else if (lir::lexer::digit(current)) HANDLE(on_num)
+
+		else if (current == '{') TOKEN(BraceLeft)
+		else if (current == '}') TOKEN(BraceRight)
+
+		else if (current == '=') HANDLE(on_equal)
+
+		else if (current == '"')  HANDLE(on_string)
+
+		else if (current == '?') TOKEN(Question)
+		else if (current == '[') TOKEN(BracketLeft)
+		else if (current == '+') HANDLE(on_plus)
+		else if (current == ']') TOKEN(BracketRight)
+
+		else if (current == '<') HANDLE(on_less)
+
+		else if (current == '*') HANDLE(on_multiply)
+
+		else if (current == '\'') HANDLE(on_char)
 
 
-		else if (iter == '=') HANDLE(on_equal)
-		else if (iter == '<') HANDLE(on_less)
-		else if (iter == '>') HANDLE(on_more)
+		else if (current == '-') HANDLE(on_minus)
+		else if (current == '/') HANDLE(on_divide)
+		else if (current == '%') HANDLE(on_mod)
+
+		else if (current == '&') HANDLE(on_ampersand)
+		else if (current == '|') HANDLE(on_bar)
+		else if (current == '~') HANDLE(on_tilde)
 
 
-		else if (iter == ':') HANDLE(on_colon)
-		else if (iter == '!') HANDLE(on_exclaim)
-		else if (iter == ';') TOKEN(Semicolon)
-		else if (iter == '?') TOKEN(Question)
-		else if (iter == '.') TOKEN(Dot)
-		else if (iter == ',') TOKEN(Comma)
+		else if (current == '>') HANDLE(on_more)
+
+
+		else if (current == '!') HANDLE(on_exclaim)
+		else if (current == '.') TOKEN(Dot)
 
 
 
-		else if (not iter.remaining())
+		else if (not view.remaining())
 			return {lir::SpecialTokenType::Eof};
 
-		return lexer_callback(++iter);
+		++view.ptr;
+		return lexer_callback(view);
 	};
 
 

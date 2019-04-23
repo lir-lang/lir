@@ -5,7 +5,7 @@
 #include <utility>
 #include <optional>
 
-#include <structures/iter.hpp>
+#include <structures/view.hpp>
 
 
 namespace lir::lexer {
@@ -38,8 +38,8 @@ namespace lir::lexer {
 
 
 	// Returns true if the next character is what is expected.
-	inline bool match(lir::Iter& iter, char expect) noexcept {
-		return (*(iter + 1) == expect) and (++iter, true);
+	inline bool match(lir::View& view, char expect) noexcept {
+		return (*(view.ptr + 1) == expect) and (++view.ptr, true);
 	}
 
 
@@ -50,60 +50,14 @@ namespace lir::lexer {
 
 	// Skip characters until predicate fails.
 	template <typename P, typename... Ts>
-	inline void skip_while(lir::Iter& iter, P pred, Ts&&... args) {
-		while (pred(iter, std::forward<Ts>(args)...) and iter.remaining())
-			++iter;
-	}
+	inline void skip_while(lir::View& view, P pred, Ts&&... args) {
+		if constexpr(sizeof...(Ts) > 0) {
+			while (pred(view.ptr + 1, std::forward<Ts>(args)...) and view.remaining())
+				++view.ptr;
 
-
-	// Skip characters until predicate fails.
-	template <typename P>
-	inline void skip_while(lir::Iter& iter, P pred) {
-		while (pred(iter) and iter.remaining())
-			++iter;
-	}
-
-
-
-
-
-
-
-	// Consume characters while predicate is satisfied.
-	template <typename P, typename... Ts>
-	inline lir::StrView read_while(lir::Iter& iter, P pred, Ts&&... args) {
-		auto begin = iter.ptr;
-
-		while (pred(iter, std::forward<Ts>(args)...) and iter.remaining())
-			++iter;
-
-		return {begin, lir::diff(iter.ptr, begin)};
-	}
-
-
-
-	// Consume characters while predicate is satisfied.
-	template <typename P>
-	inline lir::StrView read_while(lir::Iter& iter, P pred) {
-		auto begin = iter.ptr;
-
-		while (pred(iter) and iter.remaining())
-			++iter;
-
-		return {begin, lir::diff(iter.ptr, begin)};
-	}
-
-
-
-
-
-
-
-	template <typename F, typename... Ts>
-	inline void run_lexer(lir::Iter& iter, F callback, Ts&&... args) {
-		while (iter.remaining()) {
-			callback(iter, std::forward<Ts>(args)...);
-			++iter;
+		} else {
+			while (pred(view.ptr + 1) and view.remaining())
+				++view.ptr;
 		}
 	}
 
@@ -111,10 +65,39 @@ namespace lir::lexer {
 
 
 
+
+
+
+	// Consume characters while predicate is satisfied.
+	template <typename P, typename... Ts>
+	inline lir::View read_while(lir::View& view, P pred, Ts&&... args) {
+		auto begin = view.ptr;
+
+		if constexpr(sizeof...(Ts) > 0) {
+			while (pred(view.ptr + 1, std::forward<Ts>(args)...) and view.remaining())
+				++view.ptr;
+
+		} else {
+			while (pred(view.ptr + 1) and view.remaining())
+				++view.ptr;
+		}
+
+		return {begin, view.ptr + 1};
+	}
+
+
+
+
+
+
+
+
+
+
 	template <typename F>
-	inline lir::Token advance(lir::Iter& iter, F callback) {
-		auto tok = callback(iter);
-		++iter;
+	inline lir::Token advance(lir::View& view, F callback) {
+		auto tok = callback(view);
+		++view.ptr;
 		return tok;
 	}
 
