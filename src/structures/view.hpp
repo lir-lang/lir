@@ -15,10 +15,8 @@ namespace lir {
 		const char* end;
 
 
-		View() = default;
-
-		// View()
-		// 	: ptr(nullptr), end(nullptr) {}
+		View()
+			: ptr(nullptr), end(nullptr) {}
 
 		View(const std::string& str)
 			: ptr(str.c_str()), end(ptr + str.size()) {}
@@ -31,7 +29,51 @@ namespace lir {
 
 
 
-		bool remaining() {
+		const char* get() const {
+			return ptr;
+		}
+
+
+
+		char operator*() const {
+			return *ptr;
+		}
+
+
+
+
+
+		View& operator++() {
+			++ptr;
+			return *this;
+		}
+
+
+		View& operator--() {
+			--ptr;
+			return *this;
+		}
+
+
+
+
+
+		template <typename T>
+		const char* operator+(const T& x) const {
+			return ptr + x;
+		}
+
+
+		template <typename T>
+		const char* operator-(const T& x) const {
+			return ptr - x;
+		}
+
+
+
+
+
+		bool remaining() const {
 			return ptr != end;
 		}
 	};
@@ -39,7 +81,12 @@ namespace lir {
 
 
 
+
+
 std::ostream& operator<<(std::ostream& os, const lir::View& v) {
-	os << std::string_view{v.ptr, static_cast<std::string_view::size_type>(v.end - v.ptr)};
-	return os;
+	auto diff = static_cast<std::string_view::size_type>(v.end - v.ptr);
+
+	std::string_view view{v.ptr, diff};
+
+	return (os << view);
 }

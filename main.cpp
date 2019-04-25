@@ -56,7 +56,7 @@ int main(int argc, const char* argv[]) {
 	lir::View view{input};
 
 	lir::Token tok;
-	while (lir::remaining(tok)) {
+	while (not tok.eof()) {
 		tok = lir::lexer::advance(view, lir::lexer::lexer_callback);
 		// std::cerr << tok << '\n';
 	}
@@ -71,9 +71,9 @@ int main(int argc, const char* argv[]) {
 		view = lir::View{input};
 
 		std::unordered_map<uint8_t, int> freq;
-		lir::Token tok;
+		tok = lir::Token{};
 
-		while (lir::remaining(tok)) {
+		while (not tok.eof()) {
 			tok = lir::lexer::advance(view, lir::lexer::lexer_callback);
 			freq[tok.type]++;
 		}

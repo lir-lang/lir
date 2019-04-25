@@ -7,16 +7,14 @@
 #include <vector>
 #include <array>
 #include <utility>
-
-
 #include <modules/rang.hpp>
 
 
 /*
 	Macros and constants:
 
-	WS_MODULE_LOG_OFF: disables all logging.
-	WS_MODULE_PIPE_OFF: disables all piping.
+	LIR_LOG_OFF:  disables all logging.
+	LIR_PIPE_OFF: disables all piping.
 */
 
 
@@ -174,6 +172,13 @@ namespace lir {
 
 
 
+	// Remove all macros.
+	#undef NEW_COLOUR
+
+
+
+
+
 	// Custom styles
 	namespace style {
 		inline details::Reset   reset;
@@ -207,7 +212,7 @@ namespace lir {
 	// Logging and IO.
 	template <typename... Ts>
 	inline std::ostream& print(Ts&&... args) {
-		#ifndef WS_MODULE_LOG_OFF
+		#ifndef LIR_LOG_OFF
 			return ((lir::printer << style::reset) << ... << std::forward<Ts&&>(args)) << style::reset;
 		#else
 			return lir::printer;
@@ -218,7 +223,7 @@ namespace lir {
 
 	template <typename... Ts>
 	inline std::ostream& pipe(Ts&&... args) {
-		#ifndef WS_MODULE_PIPE_OFF
+		#ifndef LIR_PIPE_OFF
 			return (lir::piper << ... << std::forward<Ts&&>(args));
 		#else
 			return lir::piper;
@@ -233,7 +238,7 @@ namespace lir {
 	// Logging and IO...
 	template <typename... Ts>
 	inline std::ostream& println(Ts&&... args) {
-		#ifndef WS_MODULE_LOG_OFF
+		#ifndef LIR_LOG_OFF
 			return lir::print(std::forward<Ts&&>(args)...) << '\n';
 		#else
 			return lir::printer;
@@ -244,7 +249,7 @@ namespace lir {
 
 	template <typename... Ts>
 	inline std::ostream& pipeln(Ts&&... args) {
-		#ifndef WS_MODULE_PIPE_OFF
+		#ifndef LIR_PIPE_OFF
 			return lir::pipe(std::forward<Ts&&>(args)...) << '\n';
 		#else
 			return lir::piper;
@@ -450,8 +455,4 @@ namespace lir {
 	inline std::ostream& successln_h(Ts&&... args) {
 		return lir::success_h(std::forward<Ts&&>(args)..., '\n');
 	}
-
-
-	// Remove all macros.
-	#undef NEW_COLOUR
 }

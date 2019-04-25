@@ -40,15 +40,11 @@ use:
 
 
 
-slow:
-	mkdir -p $(BUILD_DIR)
-	g++ --std=$(STD) $(WFLAGS) $(INCLUDE) main.cpp -o $(BUILD_DIR)/$(TARGET)
-
 
 
 prof:
 	mkdir -p $(BUILD_DIR)
-	$(CC) --std=$(STD) $(WFLAGS) -pg -fprofile-use $(CFLAGS) $(INCLUDE) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(CC) --std=$(STD) $(WFLAGS) -Og -g $(INCLUDE) -c main.cpp -o $(BUILD_DIR)/main.o
 
-	$(CC) --std=$(STD) $(WFLAGS) $(LIBS) -pg -fprofile-use $(CFLAGS) $(LFLAGS) $(INCLUDE) build/*.o -o $(BUILD_DIR)/$(TARGET)
+	$(CC) --std=$(STD) $(WFLAGS) $(LIBS) -Og -g $(LFLAGS) $(INCLUDE) build/*.o -o $(BUILD_DIR)/$(TARGET)
 
