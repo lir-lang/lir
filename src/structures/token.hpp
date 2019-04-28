@@ -24,7 +24,7 @@ namespace lir {
 			: type(t), val(v) {}
 
 
-		bool eof() {
+		bool eof() const {
 			return type == lir::TokenType::Eof;
 		}
 	};
@@ -36,54 +36,54 @@ namespace lir {
 
 
 
-// inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
+inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 
 
-// 	static std::string_view::size_type longest_token_name = [](){
-// 		std::string_view::size_type max = 0;
+	static std::string_view::size_type longest_token_name = [](){
+		std::string_view::size_type max = 0;
 
-// 		for (auto it = std::begin(lir::TokenType::to_str); it != std::end(lir::TokenType::to_str); ++it) {
-// 			if (it->size() > max) max = it->size();
-// 		}
+		for (auto it = std::begin(lir::TokenType::to_str); it != std::end(lir::TokenType::to_str); ++it) {
+			if (it->size() > max) max = it->size();
+		}
 
-// 		return max;
-// 	}() + 1;
-
-
-
-// 	const auto& [type_n, val] = token;
-// 	auto type = lir::TokenType::to_str[type_n];
-
-// 	std::string str(longest_token_name - type.size(), '.');
-
-
-// 	os << lir::style::bold
-// 	<< lir::colour::fg::bright::yellow
-// 	<< type
-// 	<< lir::style::reset
-// 	<< lir::colour::fg::black
-// 	<< str
-// 	<< "["
-// 	<< lir::colour::bg::black
-// 	<< lir::colour::fg::normal
-// 	<< val
-// 	<< lir::colour::bg::normal
-// 	<< lir::colour::fg::black
-// 	<< "]"
-// 	<< lir::colour::bg::normal;
-
-// 	return os;
-// }
+		return max;
+	}() + 1;
 
 
 
-// inline std::ostream& operator<<(std::ostream& os, const std::vector<lir::Token>& tokens) {
-// 	for (auto& t: tokens) {
-// 		if (not lir::remaining(t)) break;
-// 		os << lir::colour::fg::black << "└ " << t << '\n';
-// 	}
+	const auto& [type_n, val] = token;
+	auto type = lir::TokenType::to_str[type_n];
 
-// 	return os;
-// }
+	std::string str(longest_token_name - type.size(), '.');
+
+
+	os << lir::style::bold
+	<< lir::colour::fg::bright::yellow
+	<< type
+	<< lir::style::reset
+	<< lir::colour::fg::black
+	<< str
+	<< "["
+	<< lir::colour::bg::black
+	<< lir::colour::fg::normal
+	<< val
+	<< lir::colour::bg::normal
+	<< lir::colour::fg::black
+	<< "]"
+	<< lir::colour::bg::normal;
+
+	return os;
+}
+
+
+
+inline std::ostream& operator<<(std::ostream& os, const std::vector<lir::Token>& tokens) {
+	for (auto& t: tokens) {
+		if (t.eof()) break;
+		os << lir::colour::fg::black << "└ " << t << '\n';
+	}
+
+	return os;
+}
 
 

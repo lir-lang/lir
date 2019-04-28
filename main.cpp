@@ -1,6 +1,4 @@
 #include <chrono>
-#include <vector>
-#include <iomanip>
 #include <unordered_map>
 #include <algorithm>
 
@@ -9,7 +7,6 @@
 #include <preprocessor/preprocessor.hpp>
 #include <lexer/lexer.hpp>
 #include <parser/parser.hpp>
-
 
 
 
@@ -39,6 +36,7 @@ int main(int argc, const char* argv[]) {
 	auto start_recv = timer::now();
 
 	auto input = lir::recv_stdin();
+
 
 	if (input.empty()) {
 		lir::errorln_h("no input from stdin!");
