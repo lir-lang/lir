@@ -10,6 +10,11 @@
 
 namespace lir {
 
+
+	#define likely(x)      __builtin_expect(!!(x), 1)
+	#define unlikely(x)    __builtin_expect(!!(x), 0)
+
+
 	struct View {
 		const char* ptr;
 		const char* end;
@@ -29,13 +34,13 @@ namespace lir {
 
 
 
-		const char* get() const {
+		__attribute__((pure)) const char* get() const {
 			return ptr;
 		}
 
 
 
-		char operator*() const {
+		__attribute__((pure)) char operator*() const {
 			return *ptr;
 		}
 
@@ -59,13 +64,13 @@ namespace lir {
 
 
 		template <typename T>
-		const char* operator+(const T& x) const {
+		__attribute__((pure)) const char* operator+(const T& x) const {
 			return ptr + x;
 		}
 
 
 		template <typename T>
-		const char* operator-(const T& x) const {
+		__attribute__((pure)) const char* operator-(const T& x) const {
 			return ptr - x;
 		}
 
@@ -73,10 +78,14 @@ namespace lir {
 
 
 
-		bool remaining() const {
-			return ptr != end;
+		__attribute__((pure)) bool remaining() const {
+			return likely(ptr != end);
 		}
 	};
+
+
+	#undef likely
+	#undef unlikely
 }
 
 

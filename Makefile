@@ -6,7 +6,7 @@ WFLAGS=-Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-opt
 
 
 
-CFLAGS=-Ofast -march=native -finline-limit=100 -fipa-pta -m64 -fwhole-program -fsplit-loops -funswitch-loops --static
+CFLAGS=-Ofast -msse2 -march=native -finline-limit=100 -fipa-pta -m64 -fwhole-program -fsplit-loops -funswitch-loops --static
 
 
 

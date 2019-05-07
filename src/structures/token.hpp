@@ -9,6 +9,10 @@
 
 namespace lir {
 
+	#define likely(x)      __builtin_expect(!!(x), 1)
+	#define unlikely(x)    __builtin_expect(!!(x), 0)
+
+
 	struct Token {
 		uint8_t type;
 		lir::View val;
@@ -25,10 +29,13 @@ namespace lir {
 
 
 		bool eof() const {
-			return type == lir::TokenType::Eof;
+			return unlikely(type == lir::TokenType::Eof);
 		}
 	};
 
+
+	#undef likely
+	#undef unlikely
 }
 
 
@@ -37,8 +44,7 @@ namespace lir {
 
 
 inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
-
-
+	// Find longest token name.
 	static std::string_view::size_type longest_token_name = [](){
 		std::string_view::size_type max = 0;
 
@@ -77,13 +83,5 @@ inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 
 
 
-inline std::ostream& operator<<(std::ostream& os, const std::vector<lir::Token>& tokens) {
-	for (auto& t: tokens) {
-		if (t.eof()) break;
-		os << lir::colour::fg::black << "└ " << t << '\n';
-	}
-
-	return os;
-}
 
 

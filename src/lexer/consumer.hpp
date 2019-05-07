@@ -9,17 +9,22 @@
 
 namespace lir::lexer {
 
+
+	#define likely(x)      __builtin_expect(!!(x), 1)
+	#define unlikely(x)    __builtin_expect(!!(x), 0)
+
+
 	// Check if a character is in a set of other characters.
 	// in_group<'a', 'b', 'c'>('a')
 	template <char... Ts>
-	constexpr bool in_group(const char c) noexcept { return ((c == Ts) or ...); }
+	constexpr __attribute__((const)) bool in_group(const char c) noexcept { return ((c == Ts) or ...); }
 
 
 
 	// Check a character in the range of L - R inclusive.
 	// in_range<'0', '9'>('4')
 	template <char L, char R>
-	constexpr bool in_range(const char c) noexcept { return c >= L and c <= R; }
+	constexpr __attribute__((const)) bool in_range(const char c) noexcept { return c >= L and c <= R; }
 
 
 
@@ -33,12 +38,12 @@ namespace lir::lexer {
 	constexpr auto whitespace = in_group<' ', '\t', '\n', '\v', '\r'>;
 
 
-	constexpr bool alpha(const char c) {
+	constexpr __attribute__((const)) bool alpha(const char c) {
 		return lower(c) or upper(c);
 	};
 
 
-	constexpr bool alphanumeric(const char c) {
+	constexpr __attribute__((const)) bool alphanumeric(const char c) {
 		return lower(c) or upper(c) or digit(c);
 	};
 
@@ -57,12 +62,18 @@ namespace lir::lexer {
 	inline void skip_while(lir::View& view, P pred, Ts&&... args) {
 		// Switch function body depending on whether arguments are provided.
 		if constexpr(sizeof...(Ts) > 0) {
-			while (pred(view + 1, std::forward<Ts>(args)...) and view.remaining())
+			while (pred(view + 1, std::forward<Ts>(args)...)) {
+				if (likely(view.remaining()))
+					break;
 				++view;
+			}
 
 		} else {
-			while (pred(view + 1) and view.remaining())
+			while (pred(view + 1)) {
+				if (likely(view.remaining()))
+					break;
 				++view;
+			}
 		}
 	}
 
@@ -75,12 +86,18 @@ namespace lir::lexer {
 
 		// Switch function body depending on whether arguments are provided.
 		if constexpr(sizeof...(Ts) > 0) {
-			while (pred(view + 1, std::forward<Ts>(args)...) and view.remaining())
+			while (pred(view + 1, std::forward<Ts>(args)...)) {
+				if (likely(view.remaining()))
+					break;
 				++view;
+			}
 
 		} else {
-			while (pred(view + 1) and view.remaining())
+			while (pred(view + 1)) {
+				if (likely(view.remaining()))
+					break;
 				++view;
+			}
 		}
 
 		return {begin, view + 1};
@@ -96,4 +113,7 @@ namespace lir::lexer {
 		return tok;
 	}
 
+
+	#undef unlikely
+	#undef likely
 }
