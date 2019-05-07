@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <algorithm>
 
+#include <modules/argparse.hpp>
 #include <lir.hpp>
 
 
