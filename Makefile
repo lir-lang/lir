@@ -5,7 +5,6 @@ STD=c++17
 WFLAGS=-Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5 -Wundef -Wno-unused
 
 
-
 CFLAGS=-Ofast -msse2 -march=native -finline-limit=100 -fipa-pta -m64 -fwhole-program -fsplit-loops -funswitch-loops --static
 
 

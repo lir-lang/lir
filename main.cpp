@@ -37,6 +37,14 @@ int main(int argc, const char* argv[]) {
 	auto end_recv = timer::now();
 
 
+	// Preprocess input.
+	auto start_preprocessor = timer::now();
+
+
+
+	auto end_preprocessor = timer::now();
+
+
 	// Consume tokens.
 	auto start_lexer = timer::now();
 	lir::View view{input};
