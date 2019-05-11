@@ -8,12 +8,6 @@
 
 namespace lir::lexer {
 
-
-	#define likely(x)      __builtin_expect(!!(x), 1)
-	#define unlikely(x)    __builtin_expect(!!(x), 0)
-
-
-
 	// Check next char, if matched, increment view and return true else false.
 	inline bool match(lir::View& view, char expect) noexcept {
 		return (*(view + 1) == expect) and (++view, true);
@@ -78,6 +72,4 @@ namespace lir::lexer {
 	}
 
 
-	#undef unlikely
-	#undef likely
 }

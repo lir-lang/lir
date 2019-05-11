@@ -9,11 +9,6 @@
 
 namespace lir {
 
-
-	#define likely(x)      __builtin_expect(!!(x), 1)
-	#define unlikely(x)    __builtin_expect(!!(x), 0)
-
-
 	struct View {
 		const char* ptr;
 		const char* end;
@@ -82,9 +77,6 @@ namespace lir {
 		}
 	};
 
-
-	#undef likely
-	#undef unlikely
 }
 
 

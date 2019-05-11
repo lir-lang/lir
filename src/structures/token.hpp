@@ -9,10 +9,6 @@
 
 namespace lir {
 
-	#define likely(x)      __builtin_expect(!!(x), 1)
-	#define unlikely(x)    __builtin_expect(!!(x), 0)
-
-
 	struct Token {
 		uint8_t type;
 		lir::View val;
@@ -33,9 +29,6 @@ namespace lir {
 		}
 	};
 
-
-	#undef likely
-	#undef unlikely
 }
 
 
