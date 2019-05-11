@@ -59,7 +59,7 @@ namespace lir::lexer {
 	// Consumes an identifier. ([a-zA-Z_][a-zA-Z0-9_]+)
 	lir::Token on_alpha(lir::View& view) {
 		auto ident_reader = [] (auto c) {
-			return lir::lexer::alphanumeric(*c) or *c == '_';
+			return lir::alphanumeric(*c) or *c == '_';
 		};
 
 		TOKENVAL(Identifier, lir::lexer::read_while(view, ident_reader))
@@ -72,7 +72,7 @@ namespace lir::lexer {
 		TOKENVAL(
 			Number,
 			lir::lexer::read_while(view, [] (auto c) {
-				return lir::lexer::digit(*c);
+				return lir::digit(*c);
 			})
 		)
 	}
@@ -197,19 +197,20 @@ namespace lir::lexer {
 
 
 		// Skip whitespace, recurse.
-		if (lir::lexer::whitespace(current)) {
+		if (lir::whitespace(current)) {
 			++view;
 			return lexer_callback(view);
 		}
 
 
-		else if (lir::lexer::alpha(current)) HANDLE(on_alpha)
+		else if (lir::alpha(current)) HANDLE(on_alpha)
 		else if (current == '(') TOKEN(ParenLeft)
 		else if (current == ')') TOKEN(ParenRight)
 
 		else if (current == ';') TOKEN(Semicolon)
-		else if (current == ',') TOKEN(Comma)
+		else if (lir::digit(current)) HANDLE(on_num)
 		else if (current == ':') HANDLE(on_colon)
+		else if (current == ',') TOKEN(Comma)
 
 
 		// skip comments
@@ -223,34 +224,34 @@ namespace lir::lexer {
 			return lexer_callback(view);
 		}
 
-		else if (lir::lexer::digit(current)) HANDLE(on_num)
 
-		else if (current == '{') TOKEN(BraceLeft)
-		else if (current == '}') TOKEN(BraceRight)
-		else if (current == '=') HANDLE(on_equal)
+		else if (current == '{')  TOKEN(BraceLeft)
+		else if (current == '}')  TOKEN(BraceRight)
+		else if (current == '=')  HANDLE(on_equal)
 
-		else if (current == '"') HANDLE(on_string)
-		else if (current == '?') TOKEN(Question)
-		else if (current == '[') TOKEN(BracketLeft)
+		else if (current == '.')  TOKEN(Dot)
 
-		else if (current == '+') HANDLE(on_plus)
-		else if (current == ']') TOKEN(BracketRight)
-		else if (current == '<') HANDLE(on_less)
+		else if (current == '"')  HANDLE(on_string)
+		else if (current == '?')  TOKEN(Question)
+		else if (current == '*')  HANDLE(on_multiply)
 
-		else if (current == '*') HANDLE(on_multiply)
+		else if (current == '+')  HANDLE(on_plus)
+		else if (current == '[')  TOKEN(BracketLeft)
+		else if (current == '!')  HANDLE(on_exclaim)
+
+		else if (current == ']')  TOKEN(BracketRight)
+		else if (current == '>')  HANDLE(on_more)
+		else if (current == '<')  HANDLE(on_less)
+
 		else if (current == '\'') HANDLE(on_char)
-		else if (current == '-') HANDLE(on_minus)
+		else if (current == '-')  HANDLE(on_minus)
+		else if (current == '/')  HANDLE(on_divide)
 
-		else if (current == '/') HANDLE(on_divide)
-		else if (current == '%') HANDLE(on_mod)
-		else if (current == '&') HANDLE(on_ampersand)
+		else if (current == '%')  HANDLE(on_mod)
+		else if (current == '&')  HANDLE(on_ampersand)
+		else if (current == '|')  HANDLE(on_bar)
+		else if (current == '~')  HANDLE(on_tilde)
 
-		else if (current == '|') HANDLE(on_bar)
-		else if (current == '~') HANDLE(on_tilde)
-		else if (current == '>') HANDLE(on_more)
-
-		else if (current == '!') HANDLE(on_exclaim)
-		else if (current == '.') TOKEN(Dot)
 
 
 		// Return EOF if no more tokens can be consumed.

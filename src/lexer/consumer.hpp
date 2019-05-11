@@ -3,7 +3,6 @@
 
 #include <string_view>
 #include <utility>
-#include <optional>
 #include <structures/view.hpp>
 
 
@@ -12,41 +11,6 @@ namespace lir::lexer {
 
 	#define likely(x)      __builtin_expect(!!(x), 1)
 	#define unlikely(x)    __builtin_expect(!!(x), 0)
-
-
-	// Check if a character is in a set of other characters.
-	// in_group<'a', 'b', 'c'>('a')
-	template <char... Ts>
-	constexpr __attribute__((const)) bool in_group(const char c) noexcept { return ((c == Ts) or ...); }
-
-
-
-	// Check a character in the range of L - R inclusive.
-	// in_range<'0', '9'>('4')
-	template <char L, char R>
-	constexpr __attribute__((const)) bool in_range(const char c) noexcept { return c >= L and c <= R; }
-
-
-
-
-
-	// Aliased functions
-	constexpr auto lower = in_range<'a', 'z'>;
-	constexpr auto upper = in_range<'A', 'Z'>;
-
-	constexpr auto digit = in_range<'0', '9'>;
-	constexpr auto whitespace = in_group<' ', '\t', '\n', '\v', '\r'>;
-
-
-	constexpr __attribute__((const)) bool alpha(const char c) {
-		return lower(c) or upper(c);
-	};
-
-
-	constexpr __attribute__((const)) bool alphanumeric(const char c) {
-		return lower(c) or upper(c) or digit(c);
-	};
-
 
 
 
