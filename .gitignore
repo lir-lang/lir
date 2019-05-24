@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+callgrind.out*
+cachgrind.out*
+perf.data*
+cg.out
+
+tests/
+build/
+
+todo

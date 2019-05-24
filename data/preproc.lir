@@ -1,0 +1,4 @@
+#load "data/A.lir"
+#load "data/B.lir"
+#load "data/C.lir"
+THIS_IS_MAIN

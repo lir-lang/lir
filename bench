@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+hyperfine --min-runs 10 --warmup 15 "./lir data/big.lir > /dev/null"
+
