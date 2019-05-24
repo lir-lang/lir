@@ -1,5 +1,3 @@
-#load[stdio];
-
 alias io = std::io; // Rename namespace in current scope.
 
 

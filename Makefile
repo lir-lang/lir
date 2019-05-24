@@ -1,49 +1,67 @@
 CC=g++
 STD=c++17
 
+INCLUDE=-Isrc -I.
+LIBS=-pthread -lstdc++fs
 
-WFLAGS=-Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5 -Wundef -Wno-unused
-
-
-CFLAGS=-Ofast -msse2 -march=native -finline-limit=100 -fipa-pta -m64 -fwhole-program -fsplit-loops -funswitch-loops --static
-
-
-
-LFLAGS=-flto -Wl,--as-needed -lm -lc -lgcc -lc --static
-
-INCLUDE=-I src -I .
-LIBS=
 BUILD_DIR=build
 TARGET=lir
 
 
+
+WFLAGS=-Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5 -Wundef -Wno-unused
+
+
+GENERAL_FLAGS=-msse2 -march=native -m64
+RELEASE_FLAGS=$(GENERAL_FLAGS) -Ofast -finline-limit=200 -fipa-pta -fwhole-program -fsplit-loops -funswitch-loops
+DEBUG_FLAGS=$(GENERAL_FLAGS) -O2 -g
+
+
+LFLAGS=-flto -lm -lc -lgcc -lc
+
+
+# PROFILE_GENERAL_FLAGS=-fprofile-dir=$(BUILD_DIR)/ -fvpt
+PROFILE_GEN_FLAGS=$(PROFILE_GENERAL_FLAGS) -fprofile-generate
+PROFILE_USE_FLAGS=$(PROFILE_GENERAL_FLAGS) -fprofile-use
+
+
+
+
+
+COMMAND=$(CC) --std=$(STD) $(WFLAGS) $(INCLUDE)
+
+
 all:
 	mkdir -p $(BUILD_DIR)
-	$(CC) --std=$(STD) $(WFLAGS) $(CFLAGS) $(INCLUDE) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(DEBUG_FLAGS) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(DEBUG_FLAGS) build/*.o $(LIBS) -o $(BUILD_DIR)/$(TARGET)
 
-	$(CC) --std=$(STD) $(WFLAGS) $(LIBS) $(CFLAGS) $(LFLAGS) $(INCLUDE) build/*.o -o $(BUILD_DIR)/$(TARGET)
 
-
-gen:
+unop:
 	mkdir -p $(BUILD_DIR)
-	$(CC) --std=$(STD) $(WFLAGS) -fprofile-generate -fprofile-dir=build/ $(CFLAGS) $(INCLUDE) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(LFLAGS) build/*.o $(LIBS) -o $(BUILD_DIR)/$(TARGET)
 
-	$(CC) --std=$(STD) $(WFLAGS) $(LIBS) -fprofile-generate -fprofile-dir=build/ $(CFLAGS) $(LFLAGS) $(INCLUDE) build/*.o -o $(BUILD_DIR)/$(TARGET)
 
-
-use:
+rel:
 	mkdir -p $(BUILD_DIR)
-	$(CC) --std=$(STD) $(WFLAGS) -fprofile-use $(CFLAGS) $(INCLUDE) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(RELEASE_FLAGS) $(PROFILE_GEN_FLAGS) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(RELEASE_FLAGS) $(PROFILE_GEN_FLAGS) $(LFLAGS) build/*.o $(LIBS) -o $(BUILD_DIR)/$(TARGET)
 
-	$(CC) --std=$(STD) $(WFLAGS) $(LIBS) -fprofile-use $(CFLAGS) $(LFLAGS) $(INCLUDE) build/*.o -o $(BUILD_DIR)/$(TARGET)
+	./bench
+
+	$(COMMAND) $(RELEASE_FLAGS) $(PROFILE_USE_FLAGS) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(RELEASE_FLAGS) $(PROFILE_USE_FLAGS) $(LFLAGS) build/*.o $(LIBS) -o $(BUILD_DIR)/$(TARGET)
 
 
-
-
-
-prof:
+# With symbols
+relsym:
 	mkdir -p $(BUILD_DIR)
-	$(CC) --std=$(STD) $(WFLAGS) -Og -g $(INCLUDE) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(RELEASE_FLAGS) -g $(PROFILE_GEN_FLAGS) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(RELEASE_FLAGS) -g $(PROFILE_GEN_FLAGS) $(LFLAGS) build/*.o $(LIBS) -o $(BUILD_DIR)/$(TARGET)
 
-	$(CC) --std=$(STD) $(WFLAGS) $(LIBS) -Og -g $(LFLAGS) $(INCLUDE) build/*.o -o $(BUILD_DIR)/$(TARGET)
+	./bench
+
+	$(COMMAND) $(RELEASE_FLAGS) -g $(PROFILE_USE_FLAGS) -c main.cpp -o $(BUILD_DIR)/main.o
+	$(COMMAND) $(RELEASE_FLAGS) -g $(PROFILE_USE_FLAGS) $(LFLAGS) build/*.o $(LIBS) -o $(BUILD_DIR)/$(TARGET)
 

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <structures/structures.hpp>
-#include <util/char.hpp>
-
-#include <lexer/consumer.hpp>
+#include <utils/char.hpp>
+#include <lexer/common.hpp>
 #include <lexer/callbacks.hpp>
 

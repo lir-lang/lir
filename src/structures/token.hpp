@@ -2,30 +2,30 @@
 
 
 #include <cstdint>
-#include <util/logger.hpp>
+#include <utils/logger.hpp>
 #include <structures/view.hpp>
-#include <structures/tokentypes.hpp>
+#include <structures/token_types.hpp>
 
 
 namespace lir {
 
 	struct Token {
 		uint8_t type;
-		lir::View val;
+		lir::View view;
 
 
 		Token()
-			: type(lir::TokenType::Empty) {}
+			: type(lir::Tokens::Empty) {}
 
 		Token(uint8_t t)
 			: type(t) {}
 
-		Token(uint8_t t, const lir::View& v)
-			: type(t), val(v) {}
+		Token(uint8_t t, lir::View v)
+			: type(t), view(v) {}
 
 
 		bool eof() const {
-			return unlikely(type == lir::TokenType::Eof);
+			return type == lir::Tokens::Eof;
 		}
 	};
 
@@ -41,7 +41,7 @@ inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 	static std::string_view::size_type longest_token_name = [](){
 		std::string_view::size_type max = 0;
 
-		for (auto it = std::begin(lir::TokenType::to_str); it != std::end(lir::TokenType::to_str); ++it) {
+		for (auto it = std::begin(lir::Tokens::to_str); it != std::end(lir::Tokens::to_str); ++it) {
 			if (it->size() > max) max = it->size();
 		}
 
@@ -50,8 +50,8 @@ inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 
 
 
-	const auto& [type_n, val] = token;
-	auto type = lir::TokenType::to_str[type_n];
+	const auto& [type_n, view] = token;
+	auto type = lir::Tokens::to_str[type_n];
 
 	std::string str(longest_token_name - type.size(), '.');
 
@@ -65,7 +65,7 @@ inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 	<< "["
 	<< lir::colour::bg::black
 	<< lir::colour::fg::normal
-	<< val
+	<< view
 	<< lir::colour::bg::normal
 	<< lir::colour::fg::black
 	<< "]"

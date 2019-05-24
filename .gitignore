@@ -33,7 +33,8 @@
 
 callgrind.out*
 cachgrind.out*
-
+perf.data*
+cg.out
 
 tests/
 build/
