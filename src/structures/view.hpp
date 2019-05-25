@@ -137,6 +137,41 @@ namespace lir {
 			return {begin, ptr + 1};
 		}
 
+
+		// Skip characters until predicate succeeds.
+		template <typename P, typename... Ts>
+		void skip_until(P pred, Ts&&... args) {
+			// Switch function body depending on whether arguments are provided.
+			if constexpr(sizeof...(Ts) > 0) {
+				while (not pred(*this, std::forward<Ts>(args)...) and remaining())
+					++ptr;
+
+			} else {
+				while (not pred(*this) and remaining())
+					++ptr;
+			}
+		}
+
+
+
+		// Consume characters while predicate is satisfied.
+		template <typename P, typename... Ts>
+		inline lir::View read_until(P pred, Ts&&... args) {
+			auto begin = get();
+
+			// Switch function body depending on whether arguments are provided.
+			if constexpr(sizeof...(Ts) > 0) {
+				while (not pred(*this, std::forward<Ts>(args)...) and remaining())
+					++ptr;
+
+			} else {
+				while (not pred(*this) and remaining())
+					++ptr;
+			}
+
+			return {begin, ptr + 1};
+		}
+
 	};
 
 }

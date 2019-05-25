@@ -56,13 +56,13 @@ namespace lir {
 
 
 	constexpr auto directive_reader = [] (auto c) {
-		return *c != '\n';
+		return *c == '\n';
 	};
 
 
 	void preprocessor(lir::FileStack& files) {
 		++files.view(); // skip '#'
-		auto directive = files.view().read_while(directive_reader);
+		auto directive = files.view().read_until(directive_reader);
 
 
 		lir::Token arg, directive_type;

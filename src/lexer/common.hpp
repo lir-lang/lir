@@ -33,8 +33,8 @@ namespace lir::lexer {
 	inline lir::View on_string(lir::View& view) {
 		++view;
 
-		auto str = view.read_while([] (auto c) {
-			return *(c + 1) != '"';
+		auto str = view.read_until([] (auto c) {
+			return *(c + 1) == '"';
 		});
 
 		++view;
@@ -45,8 +45,8 @@ namespace lir::lexer {
 
 	// Consumes a comment. (//[^\n]+\n)
 	inline void on_comment(lir::View& view) {
-		view.skip_while([] (auto c) {
-			return *c != '\n';
+		view.skip_until([] (auto c) {
+			return *c == '\n';
 		});
 	}
 

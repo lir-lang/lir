@@ -31,6 +31,7 @@
 *.out
 *.app
 
+massif.out*
 callgrind.out*
 cachgrind.out*
 perf.data*

@@ -10,8 +10,9 @@
 namespace lir {
 
 	struct Token {
-		uint8_t type;
 		lir::View view;
+		uint16_t line, column;
+		uint8_t type;
 
 
 		Token()
@@ -20,8 +21,14 @@ namespace lir {
 		Token(uint8_t t)
 			: type(t) {}
 
+		Token(uint8_t t, uint16_t l, uint16_t c)
+			: line(l), column(c), type(t) {}
+
 		Token(uint8_t t, lir::View v)
-			: type(t), view(v) {}
+			: view(v), type(t) {}
+
+		Token(uint8_t t, uint16_t l, uint16_t c, lir::View v)
+			: view(v), type(t) {}
 
 
 		bool eof() const {
@@ -50,7 +57,7 @@ inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 
 
 
-	const auto& [type_n, view] = token;
+	const auto& [view, line, column, type_n] = token;
 	auto type = lir::Tokens::to_str[type_n];
 
 	std::string str(longest_token_name - type.size(), '.');

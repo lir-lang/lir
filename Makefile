@@ -20,7 +20,7 @@ DEBUG_FLAGS=$(GENERAL_FLAGS) -O2 -g
 LFLAGS=-flto -lm -lc -lgcc -lc
 
 
-# PROFILE_GENERAL_FLAGS=-fprofile-dir=$(BUILD_DIR)/ -fvpt
+# PROFILE_GENERAL_FLAGS=-fvpt
 PROFILE_GEN_FLAGS=$(PROFILE_GENERAL_FLAGS) -fprofile-generate
 PROFILE_USE_FLAGS=$(PROFILE_GENERAL_FLAGS) -fprofile-use
 
