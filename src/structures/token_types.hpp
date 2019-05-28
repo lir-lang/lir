@@ -60,7 +60,7 @@ namespace lir {
 		enum: lir::TokenType {TOKEN_TYPES};
 		#undef TOKEN
 
-		#define TOKEN(x) "x",
+		#define TOKEN(x) #x,
 		constexpr std::string_view to_str[] = {TOKEN_TYPES};
 		#undef TOKEN
 	}

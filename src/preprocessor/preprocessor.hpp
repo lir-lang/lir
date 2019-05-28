@@ -6,12 +6,17 @@
 #include <structures/file_stack.hpp>
 #include <lexer/common.hpp>
 
-namespace lir {
+namespace lir::preprocessor {
 
 	inline lir::Token preprocessor_callback(lir::View& view) {
 		namespace Type = lir::Tokens;
+		namespace err = lir::except::lexer;
 
+
+		lir::Token ret;
 		char current = *view;
+
+
 
 		if (lir::common_whitespace(current)) {
 			++view;
@@ -21,84 +26,52 @@ namespace lir {
 
 		// - Dont ignore whitespace, path names can have spaces etc...
 
-		else if (lir::alpha(current)) return {Type::Identifier, lir::lexer::on_alpha(view)};
-		else if (lir::digit(current)) return {Type::Number, lir::lexer::on_num(view)};
+		else if (lir::alpha(current)) ret = {Type::Identifier, lir::lexer::on_alpha(view)};
+		// else if (lir::digit(current)) ret = {Type::Number, lir::lexer::on_num(view)};
 
-		else if (current == '(') return {Type::ParenLeft};
-		else if (current == ')') return {Type::ParenRight};
+		// else if (current == '(') ret = {Type::ParenLeft};
+		// else if (current == ')') ret = {Type::ParenRight};
 
-		else if (current == ',') return {Type::Comma};
-		else if (current == '"') return {Type::String, lir::lexer::on_string(view)};
+		// else if (current == ',') ret = {Type::Comma};
+		else if (current == '"') ret = {Type::String, lir::lexer::on_string(view)};
+
 
 		// Handle EOF...
-		else if (not view.remaining())
-			return {Type::Eof};
+		else if (not view.remaining()) ret = {Type::Eof};
 
-		lir::errorln("Unexpected character ", current, " in preprocessor directive.");
-
-		++view;
-		return preprocessor_callback(view);
-	}
-
-
-
-
-	inline bool match_token(lir::Token& tok, lir::View& view, lir::TokenType type) noexcept {
-		tok = preprocessor_callback(view);
-
-		if (tok.type != type)
-			return false;
-
-		++view;
-		return true;
-	}
-
-
-
-	constexpr auto directive_reader = [] (auto c) {
-		return *c == '\n';
-	};
-
-
-	void preprocessor(lir::FileStack& files) {
-		++files.view(); // skip '#'
-		auto directive = files.view().read_until(directive_reader);
-
-
-		lir::Token arg, directive_type;
-
-
-		match_token(directive_type, directive, lir::Tokens::Identifier);
-
-
-		if (not match_token(arg, directive, lir::Tokens::String)) {
-			static std::string error_msg = std::string{"Unexpected token '"} + std::string{lir::Tokens::to_str[arg.type]} + "', expected 'String'.";
-			throw lir::except::PreprocessorError(error_msg);
+		else {
+			err::throw_error("unexpected character '", current, "' in preprocessor directive.");
+			++view;
+			return preprocessor_callback(view);
 		}
 
+		++view;
+		return ret;
+	}
 
-		// lir::warnln(directive_type.view, " -> ", arg.view);
 
-		++files.view(); // skip terminating char, '\n'
+	void run(lir::FileStack& files) {
+		namespace err = lir::except::preprocessor;
+
+		++files.view(); // skip '#'
+
+		auto directive = files.view().read_until([] (auto c) {
+			return *c == '\n';
+		});
 
 
-		// read file.
+		lir::Token type = preprocessor_callback(directive);
+		if (type != lir::Tokens::Identifier)
+			err::throw_error("unexpected token '", lir::Tokens::to_str[type.type], "', expecting 'Identifier'.");
+
+
+		lir::Token arg = preprocessor_callback(directive);
+		if (arg != lir::Tokens::String)
+			err::throw_error("unexpected token '", lir::Tokens::to_str[type.type], "', expecting 'String'.");
+
+
 		files.newfile(arg.view.str());
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

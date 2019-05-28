@@ -28,7 +28,6 @@ int main(int argc, char* argv[]) {
 	auto start_recv = timer::now();
 
 	lir::FileStack files;
-	// files.emplace(lir::recv_stdin());
 	files.newfile(argv[1]);
 
 
@@ -43,14 +42,33 @@ int main(int argc, char* argv[]) {
 
 	// Consume tokens.
 	auto start_lexer = timer::now();
+	{
+		namespace lex   = lir::except::lexer;
+		namespace pre   = lir::except::preprocessor;
+		namespace parse = lir::except::parser;
 
+		try {
+			lir::Token tok;
+			while (not tok.eof()) {
+				tok = lir::lexer::lexer_callback(files);
+				lir::println("[L] -> ", tok);
+			}
 
-	lir::Token tok;
-	while (not tok.eof()) {
-		tok = lir::lexer::lexer_callback(files);
-		++files.view();
-		// lir::println("[L] -> ", tok);
+		} catch (const lex::LexerError& e) {
+			lex::catch_error(e);
+			return 1;
+
+		} catch (const pre::PreprocessorError& e) {
+			pre::catch_error(e);
+			return 2;
+
+		} catch (const parse::ParserError& e) {
+			parse::catch_error(e);
+			return 3;
+		}
 	}
+
+
 
 	auto end_lexer = timer::now();
 	auto end_total = timer::now();

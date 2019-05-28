@@ -19,7 +19,7 @@ namespace lir::lexer {
 		if (view.match('\''))
 			return {Type::Char, chr};
 
-		// lir::errorln("Unterminated char literal.");
+		lir::except::lexer::throw_error("unterminated character literal");
 
 		return {};
 	}
@@ -167,6 +167,10 @@ namespace lir::lexer {
 
 	// Handle all callbacks.
 	lir::Token lexer_callback(lir::FileStack& files) {
+		namespace err = lir::except::lexer;
+
+
+		lir::Token ret;
 		char current = *files.view();
 
 
@@ -181,13 +185,12 @@ namespace lir::lexer {
 		else if (current == '/' and files.view().match('/')) {
 			// Skip comments...
 			lir::lexer::on_comment(files);
-			// ++files.view();
 			return lexer_callback(files);
 		}
 
 		else if (current == '#') {
 			// Handle preprocessor directives...
-			lir::preprocessor(files);
+			lir::preprocessor::run(files);
 			return lexer_callback(files);
 		}
 
@@ -199,57 +202,61 @@ namespace lir::lexer {
 
 
 		// Identifier & Number.
-		else if (lir::alpha(current)) return {Type::Identifier, lir::lexer::on_alpha(files)};
-		else if (lir::digit(current)) return {Type::Number, lir::lexer::on_num(files)};
+		else if (lir::alpha(current)) ret = {Type::Identifier, lir::lexer::on_alpha(files)};
+		else if (lir::digit(current)) ret = {Type::Number, lir::lexer::on_num(files)};
 
 
 		// String & Char.
-		else if (current == '"')  return {Type::String, lir::lexer::on_string(files)};
-		else if (current == '\'') return on_char(files.view());
+		else if (current == '"')  ret = {Type::String, lir::lexer::on_string(files)};
+		else if (current == '\'') ret = on_char(files.view());
 
 
 		// Grouping.
-		else if (current == '(') return {Type::ParenLeft};
-		else if (current == ')') return {Type::ParenRight};
-		else if (current == '{') return {Type::BraceLeft};
-		else if (current == '}') return {Type::BraceRight};
-		else if (current == '[') return {Type::BracketLeft};
-		else if (current == ']') return {Type::BracketRight};
+		else if (current == '(') ret = {Type::ParenLeft};
+		else if (current == ')') ret = {Type::ParenRight};
+		else if (current == '{') ret = {Type::BraceLeft};
+		else if (current == '}') ret = {Type::BraceRight};
+		else if (current == '[') ret = {Type::BracketLeft};
+		else if (current == ']') ret = {Type::BracketRight};
 
 
 		// Comparison operators.
-		else if (current == '>') return on_more(files.view());
-		else if (current == '<') return on_less(files.view());
-		else if (current == '!') return on_exclaim(files.view());
-		else if (current == '=') return on_equal(files.view());
+		else if (current == '>') ret = on_more(files.view());
+		else if (current == '<') ret = on_less(files.view());
+		else if (current == '!') ret = on_exclaim(files.view());
+		else if (current == '=') ret = on_equal(files.view());
 
 
 		// Numerical operators.
-		else if (current == '+') return on_plus(files.view());
-		else if (current == '-') return on_minus(files.view());
-		else if (current == '*') return on_multiply(files.view());
-		else if (current == '/') return on_divide(files.view());
-		else if (current == '%') return on_mod(files.view());
+		else if (current == '+') ret = on_plus(files.view());
+		else if (current == '-') ret = on_minus(files.view());
+		else if (current == '*') ret = on_multiply(files.view());
+		else if (current == '/') ret = on_divide(files.view());
+		else if (current == '%') ret = on_mod(files.view());
 
 
 		// Logical operators.
-		else if (current == '&') return on_ampersand(files.view());
-		else if (current == '|') return on_bar(files.view());
-		else if (current == '~') return on_tilde(files.view());
+		else if (current == '&') ret = on_ampersand(files.view());
+		else if (current == '|') ret = on_bar(files.view());
+		else if (current == '~') ret = on_tilde(files.view());
 
 
 		// Seperators
-		else if (current == ':') return on_colon(files.view());
-		else if (current == ';') return {Type::Semicolon};
-		else if (current == '?') return {Type::Question};
-		else if (current == ',') return {Type::Comma};
-		else if (current == '.') return {Type::Dot};
+		else if (current == ':') ret = on_colon(files.view());
+		else if (current == ';') ret = {Type::Semicolon};
+		else if (current == '?') ret = {Type::Question};
+		else if (current == ',') ret = {Type::Comma};
+		else if (current == '.') ret = {Type::Dot};
 
 
+		else {
+			err::throw_error("unexpected character '", current, "'.");
+			++files.view();
+			return lexer_callback(files);
+		}
 
 
-		lir::errorln("unknown character: '", current, "'");
 		++files.view();
-		return lexer_callback(files);
+		return ret;
 	};
 }

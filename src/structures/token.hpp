@@ -39,6 +39,14 @@ namespace lir {
 }
 
 
+inline bool operator==(const lir::Token& lhs, lir::TokenType rhs) {
+	return lhs.type == rhs;
+}
+
+
+inline bool operator!=(const lir::Token& lhs, lir::TokenType rhs) {
+	return not(lhs == rhs);
+}
 
 
 
