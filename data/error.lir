@@ -1,1 +1,6 @@
-'c
+#load 123
+#load "lol"
+#nope
+#nope 123
+'x
+@

@@ -6,16 +6,17 @@
 #include <utility> // std::forward
 #include <file/file.hpp>
 #include <structures/view.hpp>
+#include <structures/position.hpp>
 
 namespace lir {
 
 	struct FileView {
 		lir::File file;
 		lir::View view;
-
+		lir::Position pos;
 
 		FileView(const std::string& fname)
-			: file(fname), view(file) {}
+			: file(fname), view(file), pos{1, 1, fname} {}
 	};
 
 
@@ -58,12 +59,21 @@ namespace lir {
 				return top().file;
 			}
 
+			lir::Position& pos() {
+				return top().pos;
+			}
+
+
 			const lir::View& view() const {
 				return top().view;
 			}
 
 			const decltype(FileView::file)& file() const {
 				return top().file;
+			}
+
+			const lir::Position& pos() const {
+				return top().pos;
 			}
 
 

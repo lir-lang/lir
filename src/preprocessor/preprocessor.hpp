@@ -8,7 +8,7 @@
 
 namespace lir::preprocessor {
 
-	inline lir::Token preprocessor_callback(lir::View& view) {
+	inline lir::Token preprocessor_callback(lir::Position& pos, lir::View& view) {
 		namespace Type = lir::Tokens;
 		namespace err = lir::except::lexer;
 
@@ -18,21 +18,23 @@ namespace lir::preprocessor {
 
 
 
-		if (lir::common_whitespace(current)) {
+		if (lir::in_group<'\t', ' '>(current)) {
 			++view;
-			return preprocessor_callback(view);
+			pos.incr_column();
+			return preprocessor_callback(pos, view);
+		}
+
+		else if (current == '\n') {
+			++view;
+			pos.incr_line();
+			return preprocessor_callback(pos, view);
 		}
 
 
-		// - Dont ignore whitespace, path names can have spaces etc...
 
 		else if (lir::alpha(current)) ret = {Type::Identifier, lir::lexer::on_alpha(view)};
-		// else if (lir::digit(current)) ret = {Type::Number, lir::lexer::on_num(view)};
+		else if (lir::digit(current)) ret = {Type::Number, lir::lexer::on_num(view)};
 
-		// else if (current == '(') ret = {Type::ParenLeft};
-		// else if (current == ')') ret = {Type::ParenRight};
-
-		// else if (current == ',') ret = {Type::Comma};
 		else if (current == '"') ret = {Type::String, lir::lexer::on_string(view)};
 
 
@@ -40,12 +42,14 @@ namespace lir::preprocessor {
 		else if (not view.remaining()) ret = {Type::Eof};
 
 		else {
-			err::throw_error("unexpected character '", current, "' in preprocessor directive.");
+			err::throw_error(pos, "unexpected character '", current, "' in preprocessor directive.");
 			++view;
-			return preprocessor_callback(view);
+			return preprocessor_callback(pos, view);
 		}
 
 		++view;
+		pos.incr_column(ret.str.size());
+
 		return ret;
 	}
 
@@ -53,24 +57,41 @@ namespace lir::preprocessor {
 	void run(lir::FileStack& files) {
 		namespace err = lir::except::preprocessor;
 
-		++files.view(); // skip '#'
+		auto& view = files.view();
+		auto& pos  = files.pos();
+		auto pos_before = pos;
 
-		auto directive = files.view().read_until([] (auto c) {
+		++view; // skip '#'
+
+		auto directive = view.read_until([] (auto c) {
 			return *c == '\n';
 		});
 
 
-		lir::Token type = preprocessor_callback(directive);
-		if (type != lir::Tokens::Identifier)
-			err::throw_error("unexpected token '", lir::Tokens::to_str[type.type], "', expecting 'Identifier'.");
+
+		lir::Token name = preprocessor_callback(pos, directive);
+		if (name != lir::Tokens::Identifier)
+			err::throw_error(pos_before, "unexpected token '", lir::Tokens::to_str[name.type], "', expecting 'Identifier'.");
 
 
-		lir::Token arg = preprocessor_callback(directive);
-		if (arg != lir::Tokens::String)
-			err::throw_error("unexpected token '", lir::Tokens::to_str[type.type], "', expecting 'String'.");
+		if (name == "load") {
+			lir::Token arg = preprocessor_callback(pos, directive);
 
+			if (arg != lir::Tokens::String)
+				err::throw_error(pos_before, "unexpected token '", lir::Tokens::to_str[arg.type], "', expecting 'String'.");
 
-		files.newfile(arg.view.str());
+			try {
+				files.newfile(arg);
+
+			} catch (err::PreprocessorError& e) {
+				e.get_pos() = pos_before;
+				throw;
+			}
+
+		} else {
+			err::throw_error(pos_before, "unknown directive '", name, "'.");
+		}
+
 	}
 }
 

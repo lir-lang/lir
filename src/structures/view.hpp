@@ -33,11 +33,25 @@ namespace lir {
 
 
 
-		std::string str() const {
-			auto diff = static_cast<std::string::size_type>(end - ptr);
-
-			return std::string{ptr, diff};
+		auto size() const {
+			return static_cast<std::string_view::size_type>(end - ptr);
 		}
+
+
+		operator std::string_view() const {
+			return std::string_view{ptr, size()};
+		}
+
+		operator std::string() const {
+			return std::string{ptr, size()};
+		}
+
+
+
+		std::string str() const {
+			return *this;
+		}
+
 
 
 
@@ -180,8 +194,31 @@ namespace lir {
 
 
 
-inline std::ostream& operator<<(std::ostream& os, const lir::View& v) {
-	auto diff = static_cast<std::string_view::size_type>(v.end - v.ptr);
 
-	return (os << std::string_view{v.ptr, diff});
+inline bool operator==(const lir::View& lhs, lir::View rhs) {
+	return (lhs.ptr == rhs.ptr) and (lhs.end == rhs.end);
+}
+
+
+inline bool operator!=(const lir::View& lhs, lir::View rhs) {
+	return not(lhs == rhs);
+}
+
+
+inline bool operator==(const lir::View& lhs, const char* rhs) {
+	return lhs == std::string_view{rhs};
+}
+
+
+inline bool operator!=(const lir::View& lhs, const char* rhs) {
+	return not(lhs == std::string_view{rhs});
+}
+
+
+
+
+
+
+inline std::ostream& operator<<(std::ostream& os, const lir::View& v) {
+	return (os << std::string_view{v});
 }

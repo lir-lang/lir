@@ -50,8 +50,8 @@ int main(int argc, char* argv[]) {
 		try {
 			lir::Token tok;
 			while (not tok.eof()) {
-				tok = lir::lexer::lexer_callback(files);
-				lir::println("[L] -> ", tok);
+				tok = lir::lexer::run(files);
+				// lir::println("[L] -> ", tok);
 			}
 
 		} catch (const lex::LexerError& e) {

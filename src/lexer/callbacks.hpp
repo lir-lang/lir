@@ -11,15 +11,15 @@ namespace lir::lexer {
 
 
 	// Consume a character literal. ('.')
-	inline lir::Token on_char(lir::View& view) {
-		++view;
+	inline lir::Token on_char(lir::FileStack& files) {
+		++files.view();
 
-		auto chr = view.get();
+		auto chr = files.view().get();
 
-		if (view.match('\''))
+		if (files.view().match('\''))
 			return {Type::Char, chr};
 
-		lir::except::lexer::throw_error("unterminated character literal");
+		lir::except::lexer::throw_error(files.pos(), "unterminated character literal");
 
 		return {};
 	}
@@ -166,37 +166,46 @@ namespace lir::lexer {
 
 
 	// Handle all callbacks.
-	lir::Token lexer_callback(lir::FileStack& files) {
+	lir::Token run(lir::FileStack& files) {
 		namespace err = lir::except::lexer;
 
 
-		lir::Token ret;
-		char current = *files.view();
+		auto& view   = files.view();
+		auto& pos    = files.pos();
+		char current = *view;
 
+		lir::Token ret;
 
 
 		// Special.
-		if (lir::common_whitespace(current)) {
+		if (lir::in_group<'\t', ' '>(current)) {
 			// Skip whitespace...
-			++files.view();
-			return lexer_callback(files);
+			++view;
+			pos.incr_column();
+			return run(files);
 		}
 
-		else if (current == '/' and files.view().match('/')) {
+		else if (current == '\n') {
+			++view;
+			pos.incr_line();
+			return run(files);
+		}
+
+		else if (current == '/' and view.match('/')) {
 			// Skip comments...
 			lir::lexer::on_comment(files);
-			return lexer_callback(files);
+			return run(files);
 		}
 
 		else if (current == '#') {
 			// Handle preprocessor directives...
 			lir::preprocessor::run(files);
-			return lexer_callback(files);
+			return run(files);
 		}
 
-		else if (not files.view().remaining())
+		else if (not view.remaining())
 			// Handle EOF...
-			return lir::lexer::on_eof(files, lexer_callback);
+			return lir::lexer::on_eof(files, run);
 
 
 
@@ -208,7 +217,7 @@ namespace lir::lexer {
 
 		// String & Char.
 		else if (current == '"')  ret = {Type::String, lir::lexer::on_string(files)};
-		else if (current == '\'') ret = on_char(files.view());
+		else if (current == '\'') ret = on_char(files);
 
 
 		// Grouping.
@@ -221,28 +230,28 @@ namespace lir::lexer {
 
 
 		// Comparison operators.
-		else if (current == '>') ret = on_more(files.view());
-		else if (current == '<') ret = on_less(files.view());
-		else if (current == '!') ret = on_exclaim(files.view());
-		else if (current == '=') ret = on_equal(files.view());
+		else if (current == '>') ret = on_more(view);
+		else if (current == '<') ret = on_less(view);
+		else if (current == '!') ret = on_exclaim(view);
+		else if (current == '=') ret = on_equal(view);
 
 
 		// Numerical operators.
-		else if (current == '+') ret = on_plus(files.view());
-		else if (current == '-') ret = on_minus(files.view());
-		else if (current == '*') ret = on_multiply(files.view());
-		else if (current == '/') ret = on_divide(files.view());
-		else if (current == '%') ret = on_mod(files.view());
+		else if (current == '+') ret = on_plus(view);
+		else if (current == '-') ret = on_minus(view);
+		else if (current == '*') ret = on_multiply(view);
+		else if (current == '/') ret = on_divide(view);
+		else if (current == '%') ret = on_mod(view);
 
 
 		// Logical operators.
-		else if (current == '&') ret = on_ampersand(files.view());
-		else if (current == '|') ret = on_bar(files.view());
-		else if (current == '~') ret = on_tilde(files.view());
+		else if (current == '&') ret = on_ampersand(view);
+		else if (current == '|') ret = on_bar(view);
+		else if (current == '~') ret = on_tilde(view);
 
 
 		// Seperators
-		else if (current == ':') ret = on_colon(files.view());
+		else if (current == ':') ret = on_colon(view);
 		else if (current == ';') ret = {Type::Semicolon};
 		else if (current == '?') ret = {Type::Question};
 		else if (current == ',') ret = {Type::Comma};
@@ -250,13 +259,15 @@ namespace lir::lexer {
 
 
 		else {
-			err::throw_error("unexpected character '", current, "'.");
-			++files.view();
-			return lexer_callback(files);
+			err::throw_error(pos, "unexpected character '", current, "'.");
+			++view;
+			return run(files);
 		}
 
 
-		++files.view();
+		pos.incr_column(ret.str.size());
+
+		++view;
 		return ret;
 	};
 }
