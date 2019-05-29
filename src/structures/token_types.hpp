@@ -1,138 +1,70 @@
 #pragma once
 
-
 #include <string_view>
+
+#define TOKEN_TYPES        \
+	TOKEN(Empty)           \
+	TOKEN(Eof)             \
+	TOKEN(Char)            \
+	TOKEN(String)          \
+	TOKEN(Identifier)      \
+	TOKEN(Number)          \
+	TOKEN(ParenLeft)       \
+	TOKEN(ParenRight)      \
+	TOKEN(BraceLeft)       \
+	TOKEN(BraceRight)      \
+	TOKEN(BracketLeft)     \
+	TOKEN(BracketRight)    \
+	TOKEN(Op_Incr)         \
+	TOKEN(Op_Decr)         \
+	TOKEN(Op_Plus)         \
+	TOKEN(Op_Minus)        \
+	TOKEN(Op_Divide)       \
+	TOKEN(Op_Multiply)     \
+	TOKEN(Op_Mod)          \
+	TOKEN(Op_ShiftLeft)    \
+	TOKEN(Op_ShiftRight)   \
+	TOKEN(Op_And)          \
+	TOKEN(Op_Or)           \
+	TOKEN(Op_Neg)          \
+	TOKEN(Op_PlusEq)       \
+	TOKEN(Op_MinusEq)      \
+	TOKEN(Op_DivideEq)     \
+	TOKEN(Op_MultiplyEq)   \
+	TOKEN(Op_ModEq)        \
+	TOKEN(Op_ShiftLeftEq)  \
+	TOKEN(Op_ShiftRightEq) \
+	TOKEN(Op_AndEq)        \
+	TOKEN(Op_OrEq)         \
+	TOKEN(Op_NegEq)        \
+	TOKEN(Cmp_Less)        \
+	TOKEN(Cmp_More)        \
+	TOKEN(Cmp_Eq)          \
+	TOKEN(Cmp_LessEq)      \
+	TOKEN(Cmp_MoreEq)      \
+	TOKEN(Cmp_NotEq)       \
+	TOKEN(Assign)          \
+	TOKEN(Exclaim)         \
+	TOKEN(Question)        \
+	TOKEN(Comma)           \
+	TOKEN(Dot)             \
+	TOKEN(Colon)           \
+	TOKEN(Namespace)       \
+	TOKEN(Semicolon)
 
 namespace lir {
 	using TokenType = uint8_t;
+
+	namespace Tokens {
+		#define TOKEN(x) x,
+		enum: lir::TokenType {TOKEN_TYPES};
+		#undef TOKEN
+
+		#define TOKEN(x) #x,
+		constexpr std::string_view to_str[] = {TOKEN_TYPES};
+		#undef TOKEN
+	}
 }
 
+#undef TOKEN_TYPES
 
-namespace lir::Tokens {
-	enum: lir::TokenType {
-		Empty,
-		Eof,
-
-		Char,
-		String,
-		Identifier,
-		Number,
-
-		ParenLeft,
-		ParenRight,
-
-		BraceLeft,
-		BraceRight,
-
-		BracketLeft,
-		BracketRight,
-
-		Op_Incr,
-		Op_Decr,
-
-		Op_Plus,
-		Op_Minus,
-		Op_Divide,
-		Op_Multiply,
-		Op_Mod,
-		Op_ShiftLeft,
-		Op_ShiftRight,
-		Op_And,
-		Op_Or,
-		Op_Neg,
-
-		Op_PlusEq,
-		Op_MinusEq,
-		Op_DivideEq,
-		Op_MultiplyEq,
-		Op_ModEq,
-		Op_ShiftLeftEq,
-		Op_ShiftRightEq,
-		Op_AndEq,
-		Op_OrEq,
-		Op_NegEq,
-
-		Cmp_Less,
-		Cmp_More,
-		Cmp_Eq,
-
-		Cmp_LessEq,
-		Cmp_MoreEq,
-		Cmp_NotEq,
-
-		Assign,
-
-		Exclaim,
-		Question,
-		Comma,
-		Dot,
-		Colon,
-		Namespace,
-		Semicolon
-	};
-
-
-	lir::TokenType Slash = Op_Divide;
-
-	constexpr std::string_view to_str[] = {
-		"Empty",
-		"Eof",
-
-		"Char",
-		"String",
-		"Identifier",
-		"Number",
-
-		"ParenLeft",
-		"ParenRight",
-
-		"BraceLeft",
-		"BraceRight",
-
-		"BracketLeft",
-		"BracketRight",
-
-		"Op_Incr",
-		"Op_Decr",
-
-		"Op_Plus",
-		"Op_Minus",
-		"Op_Divide",
-		"Op_Multiply",
-		"Op_Mod",
-		"Op_ShiftLeft",
-		"Op_ShiftRight",
-		"Op_And",
-		"Op_Or",
-		"Op_Neg",
-
-		"Op_PlusEq",
-		"Op_MinusEq",
-		"Op_DivideEq",
-		"Op_MultiplyEq",
-		"Op_ModEq",
-		"Op_ShiftLeftEq",
-		"Op_ShiftRightEq",
-		"Op_AndEq",
-		"Op_OrEq",
-		"Op_NegEq",
-
-		"Cmp_Less",
-		"Cmp_More",
-		"Cmp_Eq",
-
-		"Cmp_LessEq",
-		"Cmp_MoreEq",
-		"Cmp_NotEq",
-
-		"Assign",
-
-		"Exclaim",
-		"Question",
-		"Comma",
-		"Dot",
-		"Colon",
-		"Namespace",
-		"Semicolon"
-	};
-}

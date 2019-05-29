@@ -5,6 +5,9 @@
 #include <string_view>
 #include <utility>
 
+#include <utils/exception.hpp>
+#include <structures/position.hpp>
+
 extern "C" {
 	#include <sys/mman.h>
 	#include <sys/types.h>
@@ -58,7 +61,14 @@ namespace lir {
 		is_file_open = true;
 
 
-		filesize = fs::file_size(p);
+		try {
+			filesize = fs::file_size(p);
+
+		} catch (const fs::filesystem_error&) {
+			lir::except::preprocessor::throw_error(lir::Position{}, "cannot open file '", fname, "'.");
+		}
+
+
 		fd = open(p.c_str(), O_RDONLY, 0);
 
 		if (fd == -1) {

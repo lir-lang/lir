@@ -4,14 +4,16 @@
 #include <cstdint>
 #include <utils/logger.hpp>
 #include <structures/view.hpp>
+// #include <structures/position.hpp>
 #include <structures/token_types.hpp>
 
 
 namespace lir {
 
 	struct Token {
+		lir::View str;
+		// lir::Position pos;
 		uint8_t type;
-		lir::View view;
 
 
 		Token()
@@ -20,8 +22,29 @@ namespace lir {
 		Token(uint8_t t)
 			: type(t) {}
 
-		Token(uint8_t t, lir::View v)
-			: type(t), view(v) {}
+		// Token(uint8_t t, const lir::Position& p)
+		// 	: pos(p), type(t) {}
+
+		Token(uint8_t t, const lir::View& s)
+			: str(s), type(t) {}
+
+		// Token(uint8_t t, const lir::Position& p, const lir::View& s)
+		// 	: str(s), pos(p), type(t) {}
+
+
+
+
+
+		operator std::string_view() const {
+			return str;
+		}
+
+		operator std::string() const {
+			return str;
+		}
+
+
+
 
 
 		bool eof() const {
@@ -31,6 +54,26 @@ namespace lir {
 
 }
 
+
+inline bool operator==(const lir::Token& lhs, lir::TokenType rhs) {
+	return lhs.type == rhs;
+}
+
+
+inline bool operator!=(const lir::Token& lhs, lir::TokenType rhs) {
+	return not(lhs == rhs);
+}
+
+
+
+inline bool operator==(const lir::Token& lhs, const char* rhs) {
+	return lhs.str == rhs;
+}
+
+
+inline bool operator!=(const lir::Token& lhs, const char* rhs) {
+	return not(lhs == rhs);
+}
 
 
 
@@ -50,7 +93,7 @@ inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 
 
 
-	const auto& [type_n, view] = token;
+	const auto& [view, type_n] = token;
 	auto type = lir::Tokens::to_str[type_n];
 
 	std::string str(longest_token_name - type.size(), '.');
