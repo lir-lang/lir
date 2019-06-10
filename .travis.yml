@@ -1,8 +1,8 @@
 language: cpp
 
 compiler:
-  - clang
-  - gcc
+  - clang-8
+  - gcc-9
 
 install:
   - wget https://github.com/sharkdp/hyperfine/releases/download/v1.6.0/hyperfine_1.6.0_amd64.deb
