@@ -172,34 +172,32 @@ namespace lir {
 			return {begin, ptr + 1};
 		}
 	};
-}
 
 
 
+	// Compare two views.
+	inline bool operator==(const lir::View& lhs, lir::View rhs) {
+		return (lhs.ptr == rhs.ptr) and (lhs.end == rhs.end);
+	}
 
-
-// Compare two views.
-inline bool operator==(const lir::View& lhs, lir::View rhs) {
-	return (lhs.ptr == rhs.ptr) and (lhs.end == rhs.end);
-}
-
-inline bool operator!=(const lir::View& lhs, lir::View rhs) {
-	return not(lhs == rhs);
-}
+	inline bool operator!=(const lir::View& lhs, lir::View rhs) {
+		return not(lhs == rhs);
+	}
 
 
 
-// Compare view contents with string literal.
-inline bool operator==(const lir::View& lhs, const char* rhs) {
-	return lhs == std::string_view{rhs};
-}
+	// Compare view contents with string literal.
+	inline bool operator==(const lir::View& lhs, const char* rhs) {
+		return lhs == std::string_view{rhs};
+	}
 
-inline bool operator!=(const lir::View& lhs, const char* rhs) {
-	return not(lhs == std::string_view{rhs});
-}
+	inline bool operator!=(const lir::View& lhs, const char* rhs) {
+		return not(lhs == std::string_view{rhs});
+	}
 
 
-// Output
-inline std::ostream& operator<<(std::ostream& os, const lir::View& v) {
-	return (os << std::string_view{v});
+	// Output
+	inline std::ostream& operator<<(std::ostream& os, const lir::View& v) {
+		return (os << std::string_view{v});
+	}
 }

@@ -40,71 +40,69 @@ namespace lir {
 		}
 	};
 
+
+
+	// Easily compare a token and token_type.
+	inline bool operator==(const lir::Token& lhs, lir::TokenType rhs) {
+		return lhs.type == rhs;
+	}
+
+	inline bool operator!=(const lir::Token& lhs, lir::TokenType rhs) {
+		return not(lhs == rhs);
+	}
+
+
+	// Compare a string and content of token.
+	inline bool operator==(const lir::Token& lhs, const char* rhs) {
+		return lhs.str == rhs;
+	}
+
+	inline bool operator!=(const lir::Token& lhs, const char* rhs) {
+		return not(lhs == rhs);
+	}
+
+
+
+
+	// Just for output.
+	inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
+		// Find longest token name.
+		static std::string_view::size_type longest_token_name = [](){
+			std::string_view::size_type max = 0;
+
+			for (auto it = std::begin(lir::Tokens::to_str); it != std::end(lir::Tokens::to_str); ++it) {
+				if (it->size() > max) max = it->size();
+			}
+
+			return max;
+		}() + 1;
+
+
+
+		const auto& [view, type_n] = token;
+		auto type = lir::Tokens::to_str[type_n];
+
+		std::string str(longest_token_name - type.size(), '.');
+
+
+		os << lir::style::bold
+		<< lir::colour::fg::bright::yellow
+		<< type
+		<< lir::style::reset
+		<< lir::colour::fg::black
+		<< str
+		<< "["
+		<< lir::colour::bg::black
+		<< lir::colour::fg::normal
+		<< view
+		<< lir::colour::bg::normal
+		<< lir::colour::fg::black
+		<< "]"
+		<< lir::colour::bg::normal;
+
+		return os;
+	}
 }
-
-
-
-// Easily compare a token and token_type.
-inline bool operator==(const lir::Token& lhs, lir::TokenType rhs) {
-	return lhs.type == rhs;
-}
-
-inline bool operator!=(const lir::Token& lhs, lir::TokenType rhs) {
-	return not(lhs == rhs);
-}
-
-
-// Compare a string and content of token.
-inline bool operator==(const lir::Token& lhs, const char* rhs) {
-	return lhs.str == rhs;
-}
-
-inline bool operator!=(const lir::Token& lhs, const char* rhs) {
-	return not(lhs == rhs);
-}
-
-
-
-
-// Just for output.
-inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
-	// Find longest token name.
-	static std::string_view::size_type longest_token_name = [](){
-		std::string_view::size_type max = 0;
-
-		for (auto it = std::begin(lir::Tokens::to_str); it != std::end(lir::Tokens::to_str); ++it) {
-			if (it->size() > max) max = it->size();
-		}
-
-		return max;
-	}() + 1;
-
-
-
-	const auto& [view, type_n] = token;
-	auto type = lir::Tokens::to_str[type_n];
-
-	std::string str(longest_token_name - type.size(), '.');
-
-
-	os << lir::style::bold
-	<< lir::colour::fg::bright::yellow
-	<< type
-	<< lir::style::reset
-	<< lir::colour::fg::black
-	<< str
-	<< "["
-	<< lir::colour::bg::black
-	<< lir::colour::fg::normal
-	<< view
-	<< lir::colour::bg::normal
-	<< lir::colour::fg::black
-	<< "]"
-	<< lir::colour::bg::normal;
-
-	return os;
-}
-
 
 
 
