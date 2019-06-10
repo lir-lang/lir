@@ -1,30 +1,62 @@
 #pragma once
 
-
-#include <cstdint>
-#include <string>
 #include <iostream>
-#include <vector>
-#include <array>
 #include <utility>
 #include <modules/rang.hpp>
 
-
-/*
-	Macros and constants:
-
-	LIR_LOG_OFF:  disables all logging.
-	LIR_PIPE_OFF: disables all piping.
-*/
-
-
+// LIR_LOG_OFF:  disables all logging.
 
 namespace lir {
-	// Macros
 	#define NEW_COLOUR(name, val) constexpr auto name = val;
 
+	namespace detail::colour {
+		NEW_COLOUR(notice,  rang::fgB::yellow)
+		NEW_COLOUR(warn,    rang::fgB::blue)
+		NEW_COLOUR(error,   rang::fgB::red)
+		NEW_COLOUR(success, rang::fgB::green)
+	}
 
-	// Colours.
+	namespace detail {
+		struct Reset   { };
+		struct DimFG   { decltype(rang::fg::black) colour; };
+		struct DimBG   { decltype(rang::bg::black) colour; };
+		struct Notice  { };
+		struct Warn    { };
+		struct Error   { };
+		struct Success { };
+
+
+		inline std::ostream& operator<<(std::ostream& os, const Reset&) {
+			return (os << rang::style::reset << rang::fg::reset << rang::bg::reset);
+		}
+
+		inline std::ostream& operator<<(std::ostream& os, const DimFG& obj) {
+			return (os << rang::style::dim << obj.colour);
+		}
+
+		inline std::ostream& operator<<(std::ostream& os, const DimBG& obj) {
+			return (os << rang::style::dim << obj.colour);
+		}
+
+		inline std::ostream& operator<<(std::ostream& os, const Notice&) {
+			return (os << rang::style::bold << detail::colour::notice);
+		}
+
+		inline std::ostream& operator<<(std::ostream& os, const Warn&) {
+			return (os << rang::style::bold << detail::colour::warn);
+		}
+
+		inline std::ostream& operator<<(std::ostream& os, const Error&) {
+			return (os << rang::style::bold << detail::colour::error);
+		}
+
+		inline std::ostream& operator<<(std::ostream& os, const Success&) {
+			return (os << rang::style::bold << detail::colour::success);
+		}
+	}
+
+
+	// Define all colours in fg::, fg::bright, fg::dim, bg::, bg::bright, bg::dim.
 	namespace colour {
 		namespace fg {
 			NEW_COLOUR(black,   rang::fg::black)
@@ -36,6 +68,7 @@ namespace lir {
 			NEW_COLOUR(cyan,    rang::fg::cyan)
 			NEW_COLOUR(grey,    rang::fg::gray)
 			NEW_COLOUR(normal,  rang::fg::reset)
+			NEW_COLOUR(reset,   rang::fg::reset)
 
 			namespace bright {
 				NEW_COLOUR(black,   rang::fgB::black)
@@ -47,9 +80,22 @@ namespace lir {
 				NEW_COLOUR(cyan,    rang::fgB::cyan)
 				NEW_COLOUR(grey,    rang::fgB::gray)
 				NEW_COLOUR(normal,  rang::fg::reset)
+				NEW_COLOUR(reset,   rang::fg::reset)
 			}
-		}
 
+			namespace dim {
+				NEW_COLOUR(black,   detail::DimFG{colour::fg::black})
+				NEW_COLOUR(red,     detail::DimFG{colour::fg::red})
+				NEW_COLOUR(green,   detail::DimFG{colour::fg::green})
+				NEW_COLOUR(yellow,  detail::DimFG{colour::fg::yellow})
+				NEW_COLOUR(blue,    detail::DimFG{colour::fg::blue})
+				NEW_COLOUR(magenta, detail::DimFG{colour::fg::magenta})
+				NEW_COLOUR(cyan,    detail::DimFG{colour::fg::cyan})
+				NEW_COLOUR(grey,    detail::DimFG{colour::fg::grey})
+				NEW_COLOUR(normal,  rang::style::reset)
+			}
+
+		}
 
 		namespace bg {
 			NEW_COLOUR(black,   rang::bg::black)
@@ -61,6 +107,7 @@ namespace lir {
 			NEW_COLOUR(cyan,    rang::bg::cyan)
 			NEW_COLOUR(grey,    rang::bg::gray)
 			NEW_COLOUR(normal,  rang::bg::reset)
+			NEW_COLOUR(reset,   rang::bg::reset)
 
 			namespace bright {
 				NEW_COLOUR(black,   rang::bgB::black)
@@ -72,140 +119,48 @@ namespace lir {
 				NEW_COLOUR(cyan,    rang::bgB::cyan)
 				NEW_COLOUR(grey,    rang::bgB::gray)
 				NEW_COLOUR(normal,  rang::bg::reset)
+				NEW_COLOUR(reset,   rang::bg::reset)
+			}
+
+			namespace dim {
+				NEW_COLOUR(black,   detail::DimBG{colour::bg::black})
+				NEW_COLOUR(red,     detail::DimBG{colour::bg::red})
+				NEW_COLOUR(green,   detail::DimBG{colour::bg::green})
+				NEW_COLOUR(yellow,  detail::DimBG{colour::bg::yellow})
+				NEW_COLOUR(blue,    detail::DimBG{colour::bg::blue})
+				NEW_COLOUR(magenta, detail::DimBG{colour::bg::magenta})
+				NEW_COLOUR(cyan,    detail::DimBG{colour::bg::cyan})
+				NEW_COLOUR(grey,    detail::DimBG{colour::bg::grey})
+				NEW_COLOUR(normal,  rang::style::reset)
 			}
 		}
-
-
-		NEW_COLOUR(notice,  fg::bright::yellow)
-		NEW_COLOUR(warn,    fg::bright::blue)
-		NEW_COLOUR(error,   fg::bright::red)
-		NEW_COLOUR(success, fg::bright::green)
 	}
 
-
-
-
-
-
-	// Styles.
-	namespace style {
-		// These are the most universally supported styles.
-		constexpr auto bold = rang::style::bold;
-		constexpr auto reverse = rang::style::reversed;
-	}
-
-
-
-	namespace details {
-		struct Reset {};
-		struct DimFG { decltype(colour::fg::black) colour; };
-		struct DimBG { decltype(colour::bg::black) colour; };
-		struct Notice {};
-		struct Warn {};
-		struct Error {};
-		struct Success {};
-
-
-		// Overloads.
-		inline std::ostream& operator<<(std::ostream& os, const Reset&) {
-			return (os << rang::style::reset << rang::fg::reset << rang::bg::reset);
-		}
-
-
-		inline std::ostream& operator<<(std::ostream& os, const DimFG& obj) {
-			return (os << rang::style::dim << obj.colour);
-		}
-
-
-		inline std::ostream& operator<<(std::ostream& os, const DimBG& obj) {
-			return (os << rang::style::dim << obj.colour);
-		}
-
-
-		inline std::ostream& operator<<(std::ostream& os, const Notice&) {
-			return (os << style::bold << colour::notice);
-		}
-
-
-		inline std::ostream& operator<<(std::ostream& os, const Warn&) {
-			return (os << style::bold << colour::warn);
-		}
-
-
-		inline std::ostream& operator<<(std::ostream& os, const Error&) {
-			return (os << style::bold << colour::error);
-		}
-
-
-		inline std::ostream& operator<<(std::ostream& os, const Success&) {
-			return (os << style::bold << colour::success);
-		}
-	}
-
-
-
-	namespace colour {
-		namespace fg::dim {
-			NEW_COLOUR(black,   details::DimFG{colour::fg::black})
-			NEW_COLOUR(red,     details::DimFG{colour::fg::red})
-			NEW_COLOUR(green,   details::DimFG{colour::fg::green})
-			NEW_COLOUR(yellow,  details::DimFG{colour::fg::yellow})
-			NEW_COLOUR(blue,    details::DimFG{colour::fg::blue})
-			NEW_COLOUR(magenta, details::DimFG{colour::fg::magenta})
-			NEW_COLOUR(cyan,    details::DimFG{colour::fg::cyan})
-			NEW_COLOUR(grey,    details::DimFG{colour::fg::grey})
-			NEW_COLOUR(normal,  rang::style::reset)
-		}
-
-		namespace bg::dim {
-			NEW_COLOUR(black,   details::DimBG{colour::bg::black})
-			NEW_COLOUR(red,     details::DimBG{colour::bg::red})
-			NEW_COLOUR(green,   details::DimBG{colour::bg::green})
-			NEW_COLOUR(yellow,  details::DimBG{colour::bg::yellow})
-			NEW_COLOUR(blue,    details::DimBG{colour::bg::blue})
-			NEW_COLOUR(magenta, details::DimBG{colour::bg::magenta})
-			NEW_COLOUR(cyan,    details::DimBG{colour::bg::cyan})
-			NEW_COLOUR(grey,    details::DimBG{colour::bg::grey})
-			NEW_COLOUR(normal,  rang::style::reset)
-		}
-	}
-
-
-
-	// Remove all macros.
 	#undef NEW_COLOUR
 
 
 
-
-
-	// Custom styles
+	// Styles
 	namespace style {
-		inline details::Reset   reset;
-		inline details::Notice  notice;
-		inline details::Warn    warn;
-		inline details::Error   error;
-		inline details::Success success;
+		constexpr auto bold    = rang::style::bold;
+		constexpr auto reverse = rang::style::reversed;
+
+		constexpr detail::Reset   reset;
+		constexpr detail::Notice  notice;
+		constexpr detail::Warn    warn;
+		constexpr detail::Error   error;
+		constexpr detail::Success success;
 	}
 
 
 
-	// Output symbols
-	namespace details {
-		namespace symbol {
-			constexpr auto notice  = "[ ] ";
-			constexpr auto warn    = "[*] ";
-			constexpr auto error   = "[!] ";
-			constexpr auto success = "[^] ";
-		}
+	// Symbols.
+	namespace detail::symbol {
+		constexpr auto notice  = "[ ] ";
+		constexpr auto warn    = "[*] ";
+		constexpr auto error   = "[!] ";
+		constexpr auto success = "[^] ";
 	}
-
-
-
-	// Streams.
-	inline std::ostream& piper = std::cout;
-	inline std::ostream& printer = std::cerr;
-
 
 
 
@@ -213,246 +168,110 @@ namespace lir {
 	template <typename... Ts>
 	inline std::ostream& print(Ts&&... args) {
 		#ifndef LIR_LOG_OFF
-			return ((lir::printer << style::reset) << ... << std::forward<Ts&&>(args)) << style::reset;
+			return ((std::cout << style::reset) << ... << std::forward<Ts&&>(args)) << style::reset;
 		#else
-			return lir::printer;
+			return std::cout;
 		#endif
 	}
 
 
 
-	template <typename... Ts>
-	inline std::ostream& pipe(Ts&&... args) {
-		#ifndef LIR_PIPE_OFF
-			return (lir::piper << ... << std::forward<Ts&&>(args));
-		#else
-			return lir::piper;
-		#endif
-	}
+	// Print.
+	#define OUT(name)                                                                                         \
+		template <typename... Ts>                                                                             \
+		inline std::ostream& name(Ts&&... args) {                                                             \
+			return lir::print(style::name, detail::symbol::name, style::reset, std::forward<Ts&&>(args)...); \
+		}
+
+	OUT(notice)
+	OUT(warn)
+	OUT(success)
+	OUT(error)
+
+	#undef OUT
 
 
 
+	// Print with linebreak.
+	#define OUTLN(name)                                           \
+		template <typename... Ts>                                 \
+		inline std::ostream& name##ln(Ts&&... args) {             \
+			return lir::name(std::forward<Ts&&>(args)..., '\n'); \
+		}
+
+	OUTLN(print)
+	OUTLN(notice)
+	OUTLN(warn)
+	OUTLN(success)
+	OUTLN(error)
+
+	#undef OUTLN
 
 
 
-	// Logging and IO...
-	template <typename... Ts>
-	inline std::ostream& println(Ts&&... args) {
-		#ifndef LIR_LOG_OFF
-			return lir::print(std::forward<Ts&&>(args)...) << '\n';
-		#else
-			return lir::printer;
-		#endif
-	}
+	// Emphasis.
+	#define OUTEM(name)                                                                      \
+		template <typename T, typename... Ts>                                                \
+		inline std::ostream& name##_em(T&& first, Ts&&... args) {                            \
+			return lir::name(style::bold, first, style::reset, std::forward<Ts&&>(args)...); \
+		}
+
+	OUTEM(print)
+	OUTEM(notice)
+	OUTEM(warn)
+	OUTEM(success)
+	OUTEM(error)
+
+	#undef OUTEM
 
 
 
-	template <typename... Ts>
-	inline std::ostream& pipeln(Ts&&... args) {
-		#ifndef LIR_PIPE_OFF
-			return lir::pipe(std::forward<Ts&&>(args)...) << '\n';
-		#else
-			return lir::piper;
-		#endif
-	}
+	// Emphasis with linebreak.
+	#define OUTEMLN(name)                                            \
+		template <typename... Ts>                                    \
+		inline std::ostream& name##ln_em(Ts&&... args) {             \
+			return lir::name##_em(std::forward<Ts&&>(args)..., '\n'); \
+		}
 
+	OUTEMLN(print)
+	OUTEMLN(notice)
+	OUTEMLN(warn)
+	OUTEMLN(success)
+	OUTEMLN(error)
 
-
-
-	// Logging with colour.
-	template <typename... Ts>
-	inline std::ostream& notice(Ts&&... args) {
-		lir::print(style::notice, details::symbol::notice);
-		return lir::print(std::forward<Ts&&>(args)...);
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& warn(Ts&&... args) {
-		lir::print(style::warn, details::symbol::warn);
-		return lir::print(std::forward<Ts&&>(args)...);
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& error(Ts&&... args) {
-		lir::print(style::error, details::symbol::error);
-		return lir::print(std::forward<Ts&&>(args)...);
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& success(Ts&&... args) {
-		lir::print(style::success, details::symbol::success);
-		return lir::print(std::forward<Ts&&>(args)...);
-	}
-
-
-	// Print lines too.
-	template <typename... Ts>
-	inline std::ostream& noticeln(Ts&&... args) {
-		return lir::notice(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& warnln(Ts&&... args) {
-		return lir::warn(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& errorln(Ts&&... args) {
-		return lir::error(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& successln(Ts&&... args) {
-		return lir::success(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-
-
-	// Emphasised prints.
-	template <typename T, typename... Ts>
-	inline std::ostream& print_em(T&& first, Ts&&... args) {
-		return lir::print(
-			style::bold, first, style::reset, std::forward<Ts&&>(args)...
-		);
-	}
-
-
-	template <typename T, typename... Ts>
-	inline std::ostream& notice_em(T&& first, Ts&&... args) {
-		return lir::notice(
-			style::bold, first, style::reset, std::forward<Ts&&>(args)...
-		);
-	}
-
-
-	template <typename T, typename... Ts>
-	inline std::ostream& warn_em(T&& first, Ts&&... args) {
-		return lir::warn(
-			style::bold, first, style::reset, std::forward<Ts&&>(args)...
-		);
-	}
-
-
-	template <typename T, typename... Ts>
-	inline std::ostream& error_em(T&& first, Ts&&... args) {
-		return lir::error(
-			style::bold, first, style::reset, std::forward<Ts&&>(args)...
-		);
-	}
-
-
-	template <typename T, typename... Ts>
-	inline std::ostream& success_em(T&& first, Ts&&... args) {
-		return lir::success(
-			style::bold, first, style::reset, std::forward<Ts&&>(args)...
-		);
-	}
-
-
-
-
-
-	// Emphasis with newlines.
-	template <typename... Ts>
-	inline std::ostream& println_em(Ts&&... args) {
-		return lir::print_em(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& noticeln_em(Ts&&... args) {
-		return lir::notice_em(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& warnln_em(Ts&&... args) {
-		return lir::warn_em(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& errorln_em(Ts&&... args) {
-		return lir::error_em(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& successln_em(Ts&&... args) {
-		return lir::success_em(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
+	#undef OUTEMLN
 
 
 
 	// Headings.
-	template <typename... Ts>
-	inline std::ostream& print_h(Ts&&... args) {
-		return lir::print(style::bold, std::forward<Ts&&>(args)...);
-	}
+	#define OUTH(name)                                                  \
+		template <typename... Ts>                                       \
+		inline std::ostream& name##_h(Ts&&... args) {                   \
+			return lir::name(style::bold, std::forward<Ts&&>(args)...); \
+		}
 
+	OUTH(print)
+	OUTH(notice)
+	OUTH(warn)
+	OUTH(success)
+	OUTH(error)
 
-	template <typename... Ts>
-	inline std::ostream& notice_h(Ts&&... args) {
-		return lir::notice(style::bold, std::forward<Ts&&>(args)...);
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& warn_h(Ts&&... args) {
-		return lir::warn(style::bold, std::forward<Ts&&>(args)...);
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& error_h(Ts&&... args) {
-		return lir::error(style::bold, std::forward<Ts&&>(args)...);
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& success_h(Ts&&... args) {
-		return lir::success(style::bold, std::forward<Ts&&>(args)...);
-	}
+	#undef OUTH
 
 
 
+	// Headings with linebreak.
+	#define OUTHLN(name)                                             \
+		template <typename... Ts>                                    \
+		inline std::ostream& name##ln_h(Ts&&... args) {              \
+			return lir::name##_h(std::forward<Ts&&>(args)..., '\n'); \
+		}
 
-	// Headings with newlines.
-	template <typename... Ts>
-	inline std::ostream& println_h(Ts&&... args) {
-		return lir::print_h(std::forward<Ts&&>(args)..., '\n');
-	}
+	OUTHLN(print)
+	OUTHLN(notice)
+	OUTHLN(warn)
+	OUTHLN(success)
+	OUTHLN(error)
 
-
-	template <typename... Ts>
-	inline std::ostream& noticeln_h(Ts&&... args) {
-		return lir::notice_h(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& warnln_h(Ts&&... args) {
-		return lir::warn_h(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& errorln_h(Ts&&... args) {
-		return lir::error_h(std::forward<Ts&&>(args)..., '\n');
-	}
-
-
-	template <typename... Ts>
-	inline std::ostream& successln_h(Ts&&... args) {
-		return lir::success_h(std::forward<Ts&&>(args)..., '\n');
-	}
+	#undef OUTHLN
 }

@@ -1,18 +1,14 @@
 #pragma once
 
-
 #include <cstdint>
 #include <utils/logger.hpp>
 #include <structures/view.hpp>
-// #include <structures/position.hpp>
 #include <structures/token_types.hpp>
-
 
 namespace lir {
 
 	struct Token {
 		lir::View str;
-		// lir::Position pos;
 		uint8_t type;
 
 
@@ -22,16 +18,8 @@ namespace lir {
 		Token(uint8_t t)
 			: type(t) {}
 
-		// Token(uint8_t t, const lir::Position& p)
-		// 	: pos(p), type(t) {}
-
 		Token(uint8_t t, const lir::View& s)
 			: str(s), type(t) {}
-
-		// Token(uint8_t t, const lir::Position& p, const lir::View& s)
-		// 	: str(s), pos(p), type(t) {}
-
-
 
 
 
@@ -55,21 +43,21 @@ namespace lir {
 }
 
 
+
+// Easily compare a token and token_type.
 inline bool operator==(const lir::Token& lhs, lir::TokenType rhs) {
 	return lhs.type == rhs;
 }
-
 
 inline bool operator!=(const lir::Token& lhs, lir::TokenType rhs) {
 	return not(lhs == rhs);
 }
 
 
-
+// Compare a string and content of token.
 inline bool operator==(const lir::Token& lhs, const char* rhs) {
 	return lhs.str == rhs;
 }
-
 
 inline bool operator!=(const lir::Token& lhs, const char* rhs) {
 	return not(lhs == rhs);
@@ -78,7 +66,7 @@ inline bool operator!=(const lir::Token& lhs, const char* rhs) {
 
 
 
-
+// Just for output.
 inline std::ostream& operator<<(std::ostream& os, const lir::Token& token) {
 	// Find longest token name.
 	static std::string_view::size_type longest_token_name = [](){
