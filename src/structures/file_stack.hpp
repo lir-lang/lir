@@ -15,8 +15,9 @@ namespace lir {
 		lir::View view;
 		lir::Position pos;
 
+		// Create a new file object here and store it.
 		FileView(const std::string& fname)
-			: file(fname), view(file), pos{1, 1, fname} {}
+			: file(fname), view(file), pos(1, 1, fname) {}
 	};
 
 
@@ -50,7 +51,7 @@ namespace lir {
 			}
 
 
-
+			// Getters
 			lir::View& view() {
 				return top().view;
 			}
@@ -79,20 +80,17 @@ namespace lir {
 
 
 
-
-
-			void newfile(const std::string& fname) {
+			// Add a new file to the stack.
+			void newfile(std::string fname) {
 				stack.emplace(fname);
 			}
-
 
 			void pop() {
 				stack.pop();
 			}
 
 
-
-
+			// Implicit conversions
 			operator lir::View&() {
 				return view();
 			}
@@ -100,9 +98,5 @@ namespace lir {
 			operator decltype(FileView::file)&() {
 				return file();
 			}
-
 	};
-
-
-
 }

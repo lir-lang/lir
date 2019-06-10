@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <cstdint>
 #include <string_view>
 #include <string>
@@ -19,9 +18,6 @@ namespace lir {
 		View()
 			: ptr(nullptr), end(nullptr) {}
 
-		View(const std::string& str)
-			: ptr(str.c_str()), end(ptr + str.size()) {}
-
 		View(const lir::File& file)
 			: ptr(file.ptr), end(ptr + file.size()) {}
 
@@ -33,11 +29,13 @@ namespace lir {
 
 
 
+		// Gets the difference between the start and end pointer.
 		auto size() const {
 			return static_cast<std::string_view::size_type>(end - ptr);
 		}
 
 
+		// Implicit conversions.
 		operator std::string_view() const {
 			return std::string_view{ptr, size()};
 		}
@@ -46,20 +44,16 @@ namespace lir {
 			return std::string{ptr, size()};
 		}
 
-
-
 		std::string str() const {
-			return *this;
+			return *this; // Call implicit conversion operator.
 		}
 
 
 
-
+		// GNU extension bloat.
 		__attribute__((pure)) const char* get() const {
 			return ptr;
 		}
-
-
 
 		__attribute__((pure)) char operator*() const {
 			return *ptr;
@@ -68,12 +62,10 @@ namespace lir {
 
 
 
-
 		View& operator++() {
 			++ptr;
 			return *this;
 		}
-
 
 		View& operator--() {
 			--ptr;
@@ -87,7 +79,6 @@ namespace lir {
 			return ptr + x;
 		}
 
-
 		template <typename T>
 		__attribute__((pure)) const char* operator-(T x) const {
 			return ptr - x;
@@ -95,14 +86,9 @@ namespace lir {
 
 
 
-
-
 		__attribute__((pure)) bool remaining() const {
 			return ptr < end;
 		}
-
-
-
 
 
 
@@ -185,40 +171,35 @@ namespace lir {
 
 			return {begin, ptr + 1};
 		}
-
 	};
-
 }
 
 
 
 
 
-
+// Compare two views.
 inline bool operator==(const lir::View& lhs, lir::View rhs) {
 	return (lhs.ptr == rhs.ptr) and (lhs.end == rhs.end);
 }
-
 
 inline bool operator!=(const lir::View& lhs, lir::View rhs) {
 	return not(lhs == rhs);
 }
 
 
+
+// Compare view contents with string literal.
 inline bool operator==(const lir::View& lhs, const char* rhs) {
 	return lhs == std::string_view{rhs};
 }
-
 
 inline bool operator!=(const lir::View& lhs, const char* rhs) {
 	return not(lhs == std::string_view{rhs});
 }
 
 
-
-
-
-
+// Output
 inline std::ostream& operator<<(std::ostream& os, const lir::View& v) {
 	return (os << std::string_view{v});
 }

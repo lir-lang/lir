@@ -8,46 +8,26 @@
 
 
 
-#define NEW_EXCEPTION_TYPE(name, default_msg)    \
-	class name: public std::runtime_error {      \
-		private:                                 \
-			std::string msg;                     \
-			lir::Position pos;                   \
-		public:                                  \
-			name(const std::string& m):          \
-				std::runtime_error(m),           \
-				msg(m)                           \
-			{                                    \
-			}                                    \
-			name(                                \
-				const std::string& m,            \
-				const lir::Position& p           \
-			):                                   \
-				std::runtime_error(m),           \
-				msg(m),                          \
-				pos(p)                           \
-			{                                    \
-			}                                    \
-			name():                              \
-				std::runtime_error(default_msg), \
-				msg(default_msg)                 \
-			{                                    \
-			}                                    \
-			auto& get_msg() { return msg; } \
-			auto& get_pos() { return pos; } \
-			auto& get_msg() const { return msg; } \
-			auto& get_pos() const { return pos; } \
+#define NEW_EXCEPTION_TYPE(name, default_msg)              \
+	struct name: public std::runtime_error {               \
+		lir::Position pos;                                 \
+		name(const std::string& m)                         \
+			: std::runtime_error(m) {}                     \
+		name(const std::string& m, const lir::Position& p) \
+			: std::runtime_error(m), pos(p) {}             \
+		name()                                             \
+			: std::runtime_error(default_msg) {}           \
 	};
 
 
-#define NEW_THROWER(name, type)                              \
-	template <typename... Ts> void name(const lir::Position& pos, Ts&&... args) {      \
-		throw type(((std::string{args}) + ...), pos); \
+#define NEW_THROWER(name, type)                                                   \
+	template <typename... Ts> void name(const lir::Position& pos, Ts&&... args) { \
+		throw type(((std::string{args}) + ...), pos);                             \
 	}
 
 
 #define NEW_CATCHER(name, type, str, func) \
-	void name(const type& arg)  { func(arg.get_pos(), " -> ", lir::style::bold, str, lir::style::reset, "\n\t", arg.get_msg());  }
+	void name(const type& arg) { func(arg.pos, " -> ", lir::style::bold, str, lir::style::reset, "\n\t", arg.what()); }
 
 
 

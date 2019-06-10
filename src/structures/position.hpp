@@ -4,10 +4,18 @@
 #include <cstdint>
 
 namespace lir {
+	// Stores a position and filename.
 	struct Position {
-		uint32_t line = 1;
-		uint16_t column = 1;
+		uint32_t line = 1, column = 1;
 		std::string filename;
+
+
+		Position() = default;
+
+		Position(uint32_t l, uint32_t c, const std::string& f)
+			: line(l), column(c), filename(f) {}
+
+
 
 		void incr_line(uint32_t n = 1) {
 			column = 1;
@@ -24,6 +32,6 @@ namespace lir {
 
 
 std::ostream& operator<<(std::ostream& os, const lir::Position& pos) {
-	const auto& [l, c, file] = pos;
-	return (os << '(' << l << ", " << c << ") in '" << file << '\'');
+	const auto& [line, column, file] = pos;
+	return (os << "[ " << lir::style::bold << line << ": " << column << lir::style::reset << " ]" << " in '" << lir::colour::bg::black << file << lir::colour::bg::normal << '\'');
 }

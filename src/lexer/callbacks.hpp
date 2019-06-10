@@ -167,7 +167,9 @@ namespace lir::lexer {
 
 	// Handle all callbacks.
 	lir::Token run(lir::FileStack& files) {
-		namespace err = lir::except::lexer;
+		namespace lex   = lir::except::lexer;
+		namespace pre   = lir::except::preprocessor;
+		namespace parse = lir::except::parser;
 
 
 		auto& view   = files.view();
@@ -176,98 +178,121 @@ namespace lir::lexer {
 
 		lir::Token ret;
 
+		try {
 
-		// Special.
-		if (lir::in_group<'\t', ' '>(current)) {
-			// Skip whitespace...
+			// Special.
+			if (lir::in_group<'\t', ' '>(current)) {
+				// Skip whitespace...
+				++view;
+				pos.incr_column();
+				return run(files);
+			}
+
+			else if (current == '\n') {
+				++view;
+				pos.incr_line();
+				return run(files);
+			}
+
+			else if (current == '/' and view.match('/')) {
+				// Skip comments...
+				lir::lexer::on_comment(files);
+				return run(files);
+			}
+
+			else if (current == '#') {
+				// Handle preprocessor directives...
+				lir::preprocessor::run(files);
+				return run(files);
+			}
+
+			else if (not view.remaining())
+				// Handle EOF...
+				return lir::lexer::on_eof(files, run);
+
+
+
+
+			// Identifier & Number.
+			else if (lir::alpha(current)) ret = {Type::Identifier, lir::lexer::on_alpha(files)};
+			else if (lir::digit(current)) ret = {Type::Number, lir::lexer::on_num(files)};
+
+
+			// String & Char.
+			else if (current == '"')  ret = {Type::String, lir::lexer::on_string(files)};
+			else if (current == '\'') ret = on_char(files);
+
+
+			// Grouping.
+			else if (current == '(') ret = {Type::ParenLeft};
+			else if (current == ')') ret = {Type::ParenRight};
+			else if (current == '{') ret = {Type::BraceLeft};
+			else if (current == '}') ret = {Type::BraceRight};
+			else if (current == '[') ret = {Type::BracketLeft};
+			else if (current == ']') ret = {Type::BracketRight};
+
+
+			// Comparison operators.
+			else if (current == '>') ret = on_more(view);
+			else if (current == '<') ret = on_less(view);
+			else if (current == '!') ret = on_exclaim(view);
+			else if (current == '=') ret = on_equal(view);
+
+
+			// Numerical operators.
+			else if (current == '+') ret = on_plus(view);
+			else if (current == '-') ret = on_minus(view);
+			else if (current == '*') ret = on_multiply(view);
+			else if (current == '/') ret = on_divide(view);
+			else if (current == '%') ret = on_mod(view);
+
+
+			// Logical operators.
+			else if (current == '&') ret = on_ampersand(view);
+			else if (current == '|') ret = on_bar(view);
+			else if (current == '~') ret = on_tilde(view);
+
+
+			// Seperators
+			else if (current == ':') ret = on_colon(view);
+			else if (current == ';') ret = {Type::Semicolon};
+			else if (current == '?') ret = {Type::Question};
+			else if (current == ',') ret = {Type::Comma};
+			else if (current == '.') ret = {Type::Dot};
+
+
+			else {
+				lex::throw_error(pos, "unexpected character '", current, "'.");
+				++view;
+				return run(files);
+			}
+
+			pos.incr_column(ret.str.size());
+
 			++view;
-			pos.incr_column();
-			return run(files);
+			return ret;
+
+		} catch (const lex::LexerNotice& e) {
+			lex::catch_notice(e);
+
+		} catch (const pre::PreprocessorNotice& e) {
+			pre::catch_notice(e);
+
+		} catch (const parse::ParserNotice& e) {
+			parse::catch_notice(e);
+
+		} catch (const lex::LexerWarn& e) {
+			lex::catch_warn(e);
+
+		} catch (const pre::PreprocessorWarn& e) {
+			pre::catch_warn(e);
+
+		} catch (const parse::ParserWarn& e) {
+			parse::catch_warn(e);
 		}
 
-		else if (current == '\n') {
-			++view;
-			pos.incr_line();
-			return run(files);
-		}
-
-		else if (current == '/' and view.match('/')) {
-			// Skip comments...
-			lir::lexer::on_comment(files);
-			return run(files);
-		}
-
-		else if (current == '#') {
-			// Handle preprocessor directives...
-			lir::preprocessor::run(files);
-			return run(files);
-		}
-
-		else if (not view.remaining())
-			// Handle EOF...
-			return lir::lexer::on_eof(files, run);
-
-
-
-
-		// Identifier & Number.
-		else if (lir::alpha(current)) ret = {Type::Identifier, lir::lexer::on_alpha(files)};
-		else if (lir::digit(current)) ret = {Type::Number, lir::lexer::on_num(files)};
-
-
-		// String & Char.
-		else if (current == '"')  ret = {Type::String, lir::lexer::on_string(files)};
-		else if (current == '\'') ret = on_char(files);
-
-
-		// Grouping.
-		else if (current == '(') ret = {Type::ParenLeft};
-		else if (current == ')') ret = {Type::ParenRight};
-		else if (current == '{') ret = {Type::BraceLeft};
-		else if (current == '}') ret = {Type::BraceRight};
-		else if (current == '[') ret = {Type::BracketLeft};
-		else if (current == ']') ret = {Type::BracketRight};
-
-
-		// Comparison operators.
-		else if (current == '>') ret = on_more(view);
-		else if (current == '<') ret = on_less(view);
-		else if (current == '!') ret = on_exclaim(view);
-		else if (current == '=') ret = on_equal(view);
-
-
-		// Numerical operators.
-		else if (current == '+') ret = on_plus(view);
-		else if (current == '-') ret = on_minus(view);
-		else if (current == '*') ret = on_multiply(view);
-		else if (current == '/') ret = on_divide(view);
-		else if (current == '%') ret = on_mod(view);
-
-
-		// Logical operators.
-		else if (current == '&') ret = on_ampersand(view);
-		else if (current == '|') ret = on_bar(view);
-		else if (current == '~') ret = on_tilde(view);
-
-
-		// Seperators
-		else if (current == ':') ret = on_colon(view);
-		else if (current == ';') ret = {Type::Semicolon};
-		else if (current == '?') ret = {Type::Question};
-		else if (current == ',') ret = {Type::Comma};
-		else if (current == '.') ret = {Type::Dot};
-
-
-		else {
-			err::throw_error(pos, "unexpected character '", current, "'.");
-			++view;
-			return run(files);
-		}
-
-
-		pos.incr_column(ret.str.size());
 
 		++view;
-		return ret;
+		return run(files);
 	};
 }
