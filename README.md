@@ -1,4 +1,5 @@
-![logo](./docs/logo.png)
+<img src="./docs/logo.png" width=50%>
+
 # Lir compiler
 Compiler for the Lir language
 
