@@ -11,21 +11,23 @@ namespace lir::parser {
 
         FileStack& files;
 
-        AST prefix;
-        AST infix;
+        AST prefix_node;
+        AST infix_node;
     };
 
     void advance(State& state) {
         state.previous = state.current;
 
         state.current = lexer::run(state.files);
+
+        lir::println("[L] -> ", state.current);
     }
 
     void consume(State& state, TokenType type, const char* msg) {
         if (state.current == type) {
             advance(state);
         } else {
-            // Todo throw error
+            throw lir::except::parser::ParserError(msg);
         }
     }
 

@@ -70,7 +70,7 @@ namespace lir::parser {
             return nullptr;
         }
 
-        prefix_rule(state);
+        state.prefix_node = std::move(prefix_rule(state));
 
         while (precedence <= rules[state.current.type].precedence) {
             advance(state);
@@ -79,46 +79,53 @@ namespace lir::parser {
                 // Throw error
                 return nullptr;
             }
-            infix_rule(state);
+            state.prefix_node = std::move(infix_rule(state));
         }
+
+        return std::move(state.prefix_node);
     }
 
     AST expression(State& state) {
-        parse_precedence(state, Prec::Assignment);
+        return std::move(parse_precedence(state, Prec::Assignment));
     }
 
     AST literal(State& state) {
-        state.prefix = std::move(std::make_unique<Expression>(expressions::Literal(state.current.str)));
+        return std::move(std::make_unique<Expression>(expressions::Literal(state.previous)));
     }
 
     AST unary(State& state) {
         TokenType op = state.previous.type;
 
-        parse_precedence(state, Prec::Unary);
+        AST expr = parse_precedence(state, Prec::Unary);
+
+        return std::move(std::make_unique<Expression>(expressions::Unary(op, expr)));
     }
 
     AST binary(State& state) {
+        AST left = std::move(state.prefix_node);
         TokenType op = state.previous.type;
-        parse_precedence(state, static_cast<Prec>(static_cast<uint8_t>(rules[op].precedence) + 1));
-
+        AST right = parse_precedence(state, static_cast<Prec>(static_cast<uint8_t>(rules[op].precedence) + 1));
+        return std::move(std::make_unique<Expression>(expressions::Binary(left, op, right)));
     }
     
     AST grouping(State& state) {
-        expression(state);
+        AST expr = expression(state);
+        consume(state, Tokens::ParenRight, "No right paren");
+        return std::move(std::make_unique<Expression>(expressions::Grouping(expr)));
     }
 
-    decltype(auto) run(lir::FileStack& files) {
-        State state = { .previous = {},
-                        .current  = {}, 
-                        .files    = files,
-                        .prefix   = nullptr,
-                        .infix    = nullptr };
+    AST run(lir::FileStack& files) {
+        State state = { .previous    = {},
+                        .current     = {}, 
+                        .files       = files,
+                        .prefix_node = nullptr,
+                        .infix_node  = nullptr };
         
         advance(state);
-        AST ast = std::move(expression(state));
+        AST ast = expression(state);
         consume(state, Tokens::Eof, "Expected EOF");
 
-        return std::move(ast);
+        return ast;
     }
 
 }
