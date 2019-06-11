@@ -6,4 +6,5 @@
 #include <structures/view.hpp>
 #include <structures/char_lookup.hpp>
 #include <structures/file_stack.hpp>
-
+#include <structures/ast.hpp>
+#include <structures/visitor.hpp>
