@@ -40,18 +40,21 @@ int main(int argc, char* argv[]) {
 
 		lir::println("[T] -> ", ast);
 
+
 		lir::backend::treewalk::TreeWalk interpreter;
-		std::cout << "[R] -> "
-				  << lir::colour::bg::normal
-              	  << lir::colour::fg::black
-				  << "["
-				  << lir::colour::bg::black
-		      	  << lir::colour::fg::normal
-				  << interpreter.eval(ast)
-				  << lir::colour::bg::normal
-              	  << lir::colour::fg::black
-				  << "]"
-				  << std::endl;
+
+		auto result = interpreter.eval(ast);
+
+		lir::println("[R] -> ",
+				     lir::colour::bg::normal,
+              	     lir::colour::fg::black,
+				     "[",
+				     lir::colour::bg::black,
+		      	     lir::colour::fg::normal,
+				     result,
+				     lir::colour::bg::normal,
+              	     lir::colour::fg::black,
+				     "]");
 
 
 	// Just catch any error.

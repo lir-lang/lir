@@ -3,26 +3,28 @@
 #include <structures/structures.hpp>
 
 #include <string>
+#include <variant>
 
 namespace lir::backend::treewalk {
 
+    using TreeWalkValue = std::variant<double, bool>;
+
     // Simple tree walk interpreter, not complete
     class TreeWalk {
-
     public:
 
         // Executes literal nodes
-        double operator()(lir::expressions::Literal& node) {
-            return std::stod(node.value);
+        TreeWalkValue operator()(const lir::expressions::Literal& node) {
+            return { std::stod(node.value) };
         }
 
         // Executes unary nodes
-        double operator()(lir::expressions::Unary& node) {
+        TreeWalkValue operator()(const lir::expressions::Unary& node) {
             auto expr = eval(node.expression);
 
             switch (node.op) {
                 case Tokens::Op_Minus:
-                    return -expr;
+                    return { -std::get<double>(expr) };
                     
                 default:
                     throw std::runtime_error("UNREACHABLE");
@@ -30,19 +32,34 @@ namespace lir::backend::treewalk {
         }
 
         // Executes binary nodes
-        double operator()(lir::expressions::Binary& node) {
+        TreeWalkValue operator()(const lir::expressions::Binary& node) {
             auto left  = eval(node.left);
             auto right = eval(node.right);
 
             switch (node.op) {
+                // Numerical operations
                 case Tokens::Op_Plus: 
-                    return left + right;
+                    return { std::get<double>(left) + std::get<double>(right) };
                 case Tokens::Op_Minus:
-                    return left - right;
+                    return { std::get<double>(left) - std::get<double>(right) };
                 case Tokens::Op_Multiply:
-                    return left * right;
+                    return { std::get<double>(left) * std::get<double>(right) };
                 case Tokens::Op_Divide:
-                    return left / right;
+                    return { std::get<double>(left) / std::get<double>(right) };
+
+                // Boolean operations
+                case Tokens::Cmp_Less:
+                    return { std::get<double>(left) < std::get<double>(right) };
+                case Tokens::Cmp_More:
+                    return { std::get<double>(left) > std::get<double>(right) };
+                case Tokens::Cmp_Eq:
+                    return { std::get<double>(left) == std::get<double>(right) };
+                case Tokens::Cmp_LessEq:
+                    return { std::get<double>(left) <= std::get<double>(right) };
+                case Tokens::Cmp_MoreEq:
+                    return { std::get<double>(left) >= std::get<double>(right) };
+                case Tokens::Cmp_NotEq: 
+                    return { std::get<double>(left) != std::get<double>(right) };
                 
                 default:
                     throw std::runtime_error("UNREACHABLE");
@@ -50,15 +67,32 @@ namespace lir::backend::treewalk {
         }
 
         // Executes grouping
-        double operator()(lir::expressions::Grouping& node) {
+        TreeWalkValue operator()(const lir::expressions::Grouping& node) {
             return eval(node.expression);
         }
 
         // Recusive function to execute tree using vistor pattern
-        double eval(lir::AST& ast) {
+        TreeWalkValue eval(const lir::AST& ast) {
             return std::visit(*this, *ast);
         }
 
     };
 
+}
+
+// In its own namespace since gcc is super weird about templates
+namespace lir {
+    inline std::ostream& operator<<(std::ostream& os, const lir::backend::treewalk::TreeWalkValue& value) {
+        if(auto d = std::get_if<double>(&value)) {
+            os << *d;
+        } else if(auto b = std::get_if<bool>(&value)) {
+            if(*b)
+                os << "true";
+            else
+                os << "false";
+        } else {
+            throw std::runtime_error("UNREACHABLE");
+        }
+        return os;
+    }
 }
