@@ -10,8 +10,6 @@ namespace lir::parser {
         Token current;
 
         FileStack& files;
-
-        AST cur_node;
     };
 
     void advance(State& state) {
@@ -42,7 +40,7 @@ namespace lir::parser {
         Primary
     };
 
-    using ParseFn = void(*)(State& state);
+    using ParseFn = AST&(*)(State& state);
 
     struct ParseRule {
         ParseFn prefix;
