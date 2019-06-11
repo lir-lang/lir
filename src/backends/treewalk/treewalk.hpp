@@ -78,6 +78,11 @@ namespace lir::backend::treewalk {
 
     };
 
+    decltype(auto) interpret(const lir::AST& ast) {
+        TreeWalk interpreter;
+        return interpreter.eval(std::forward<decltype(ast)>(ast));
+    }
+
 }
 
 // In its own namespace since gcc is super weird about templates

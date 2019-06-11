@@ -37,14 +37,9 @@ int main(int argc, char* argv[]) {
 		}
 
 		lir::AST ast = lir::parser::run(files);
-
 		lir::println("[T] -> ", ast);
 
-
-		lir::backend::treewalk::TreeWalk interpreter;
-
-		auto result = interpreter.eval(ast);
-
+		auto result = lir::backend::treewalk::interpret(ast);
 		lir::println("[R] -> ",
 				     lir::colour::bg::normal,
               	     lir::colour::fg::black,
@@ -55,7 +50,6 @@ int main(int argc, char* argv[]) {
 				     lir::colour::bg::normal,
               	     lir::colour::fg::black,
 				     "]");
-
 
 	// Just catch any error.
 	} catch (const std::exception& e) {
