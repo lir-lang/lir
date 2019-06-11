@@ -2,9 +2,11 @@
 
 #include <structures/structures.hpp>
 #include <lexer/lexer.hpp>
+#include <utils/utils.hpp>
 
 namespace lir::parser {
 
+    // Parser state passed throughout the parser internally
     struct State {
         Token previous;
         Token current;
@@ -13,16 +15,21 @@ namespace lir::parser {
 
         AST prefix_node;
         AST infix_node;
+
+        bool debug_mode;
     };
 
+    // Gets next token
     void advance(State& state) {
         state.previous = state.current;
 
         state.current = lexer::run(state.files);
 
-        lir::println("[L] -> ", state.current);
+        if(state.debug_mode)
+            lir::println("[L] -> ", state.current);
     }
 
+    // Consumes next token, if incorrect token, throws error
     void consume(State& state, TokenType type, const char* msg) {
         if (state.current == type) {
             advance(state);
@@ -31,6 +38,7 @@ namespace lir::parser {
         }
     }
 
+    // Parsing precedence
     enum class Prec: uint8_t {
         None,
         Assignment,  // =
@@ -45,8 +53,10 @@ namespace lir::parser {
         Primary
     };
 
+    // Parse function
     using ParseFn = AST(*)(State& state);
 
+    // Parse rule for each token
     struct ParseRule {
         ParseFn prefix;
         ParseFn infix;
