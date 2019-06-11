@@ -4,13 +4,13 @@
 
 namespace lir::parser {
 
-    AST& expression(State& state);
-    AST& literal(State& state);
-    AST& unary(State& state);
-    AST& binary(State& state);
-    AST& grouping(State& state);
+    AST expression (State& state);
+    AST literal    (State& state);
+    AST unary      (State& state);
+    AST binary     (State& state);
+    AST grouping   (State& state);
 
-    constexpr ParseRule parse_rules[] = {
+    constexpr ParseRule rules[] = {
         { nullptr,  nullptr, Prec::None   }, // Tokens::Empty
         { nullptr,  nullptr, Prec::None   }, // Tokens::Eof
         { nullptr,  nullptr, Prec::None   }, // Tokens::Char
@@ -61,38 +61,64 @@ namespace lir::parser {
         { nullptr,  nullptr, Prec::None   }, // Tokens::Semicolon
     };
 
+    AST parse_precedence(State& state, Prec precedence) {
+        advance(state);
 
+        ParseFn prefix_rule = rules[state.previous.type].prefix;
+        if (prefix_rule == nullptr) {
+            // Throw error
+            return nullptr;
+        }
 
-    AST& expression(State& state) {
+        prefix_rule(state);
 
+        while (precedence <= rules[state.current.type].precedence) {
+            advance(state);
+            ParseFn infix_rule = rules[state.previous.type].infix;
+            if (infix_rule == nullptr) {
+                // Throw error
+                return nullptr;
+            }
+            infix_rule(state);
+        }
     }
 
-    AST& literal(State& state) {
-
+    AST expression(State& state) {
+        parse_precedence(state, Prec::Assignment);
     }
 
-    AST& unary(State& state) {
-
+    AST literal(State& state) {
+        state.prefix = std::move(std::make_unique<Expression>(expressions::Literal(state.current.str)));
     }
 
-    AST& binary(State& state) {
+    AST unary(State& state) {
+        TokenType op = state.previous.type;
+
+        parse_precedence(state, Prec::Unary);
+    }
+
+    AST binary(State& state) {
+        TokenType op = state.previous.type;
+        parse_precedence(state, static_cast<Prec>(static_cast<uint8_t>(rules[op].precedence) + 1));
 
     }
     
-    AST& grouping(State& state) {
-
+    AST grouping(State& state) {
+        expression(state);
     }
 
-    AST& run(lir::FileStack& files) {
+    decltype(auto) run(lir::FileStack& files) {
         State state = { .previous = {},
                         .current  = {}, 
-                        .files    = files };
+                        .files    = files,
+                        .prefix   = nullptr,
+                        .infix    = nullptr };
         
         advance(state);
         AST ast = std::move(expression(state));
         consume(state, Tokens::Eof, "Expected EOF");
 
-        return ast;
+        return std::move(ast);
     }
 
 }

@@ -27,21 +27,33 @@ namespace lir {
     namespace expressions {
 
         struct Literal {
+            Literal(const std::string& val)
+                : value(val) {}
+
             std::string value;
         };
 
         struct Unary {
+            Unary(TokenType o, std::unique_ptr<Expression>& expr)
+                : op(o), expression(std::move(expr)) {}
+
             TokenType op;
             std::unique_ptr<Expression> expression;
         };
 
         struct Binary {
+            Binary(std::unique_ptr<Expression>& l, TokenType o, std::unique_ptr<Expression>& r)
+                : left(std::move(l)), op(o), right(std::move(r)) {}
+
             std::unique_ptr<Expression> left;
             TokenType op;
             std::unique_ptr<Expression> right;
         };
 
         struct Grouping {
+            Grouping(std::unique_ptr<Expression>& expr)
+                : expression(std::move(expr)) {}
+            
             std::unique_ptr<Expression> expression;
         };
 

@@ -10,6 +10,9 @@ namespace lir::parser {
         Token current;
 
         FileStack& files;
+
+        AST prefix;
+        AST infix;
     };
 
     void advance(State& state) {
@@ -26,7 +29,7 @@ namespace lir::parser {
         }
     }
 
-    enum class Prec: uint8_t{
+    enum class Prec: uint8_t {
         None,
         Assignment,  // =
         Or,          // or
@@ -40,7 +43,7 @@ namespace lir::parser {
         Primary
     };
 
-    using ParseFn = AST&(*)(State& state);
+    using ParseFn = AST(*)(State& state);
 
     struct ParseRule {
         ParseFn prefix;
