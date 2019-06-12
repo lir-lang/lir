@@ -1,4 +1,4 @@
-CC=g++
+CXX=g++
 STD=c++17
 
 INCLUDE=-Isrc -I.
@@ -28,7 +28,7 @@ PROFILE_USE_FLAGS=$(PROFILE_GENERAL_FLAGS) -fprofile-use
 
 
 
-COMMAND=$(CC) --std=$(STD) $(WFLAGS) $(INCLUDE)
+COMMAND=$(CXX) --std=$(STD) $(WFLAGS) $(INCLUDE)
 
 
 all:

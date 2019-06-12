@@ -138,11 +138,11 @@ namespace lir {
         
     };
 
-    // Printing the AST using ASTPrinter
-    inline std::ostream& operator<<(std::ostream& os, const lir::AST& ast) {
-        ASTPrinter p = { .os = os };
-        p.print(ast);
-        return os;
-    }
+}
 
+// Printing the AST using ASTPrinter
+inline std::ostream& operator<<(std::ostream& os, const lir::AST& ast) {
+    lir::ASTPrinter p = { .os = os };
+    p.print(ast);
+    return os;
 }

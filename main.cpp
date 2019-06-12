@@ -37,19 +37,22 @@ int main(int argc, char* argv[]) {
 		}
 
 		lir::AST ast = lir::parser::run(files);
-		lir::println("[T] -> ", ast);
+		//lir::println("[T] -> ", ast);
+		std::cout << ast << std::endl;
 
 		auto result = lir::backend::treewalk::interpret(ast);
-		lir::println("[R] -> ",
-				     lir::colour::bg::normal,
-              	     lir::colour::fg::black,
-				     "[",
-				     lir::colour::bg::black,
-		      	     lir::colour::fg::normal,
-				     result,
-				     lir::colour::bg::normal,
-              	     lir::colour::fg::black,
-				     "]");
+
+		std::cout << "[R] -> "
+				  << lir::colour::bg::normal
+              	  << lir::colour::fg::black
+				  << "["
+				  << lir::colour::bg::black
+		      	  << lir::colour::fg::normal
+				  << result
+				  << lir::colour::bg::normal
+              	  << lir::colour::fg::black
+				  << "]"
+				  << std::endl;
 
 	// Just catch any error.
 	} catch (const std::exception& e) {

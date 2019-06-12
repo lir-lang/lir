@@ -86,18 +86,16 @@ namespace lir::backend::treewalk {
 }
 
 // In its own namespace since gcc is super weird about templates
-namespace lir {
-    inline std::ostream& operator<<(std::ostream& os, const lir::backend::treewalk::TreeWalkValue& value) {
-        if(auto d = std::get_if<double>(&value)) {
-            os << *d;
-        } else if(auto b = std::get_if<bool>(&value)) {
-            if(*b)
-                os << "true";
-            else
-                os << "false";
-        } else {
-            throw std::runtime_error("UNREACHABLE");
-        }
-        return os;
+inline std::ostream& operator<<(std::ostream& os, const lir::backend::treewalk::TreeWalkValue& value) {
+    if(auto d = std::get_if<double>(&value)) {
+        os << *d;
+    } else if(auto b = std::get_if<bool>(&value)) {
+        if(*b)
+            os << "true";
+        else
+            os << "false";
+    } else {
+        throw std::runtime_error("UNREACHABLE");
     }
+    return os;
 }
