@@ -2,6 +2,8 @@
 // #include <modules/cxxopts.hpp>
 #include <lir.hpp>
 
+// Basic compile time flags
+constexpr bool debug_mode = false;
 
 
 // Convenience.
@@ -10,10 +12,6 @@ using units = std::chrono::milliseconds;
 
 template <typename T>
 constexpr auto diff = [] (auto a, auto b) { return std::chrono::duration_cast<T>(a - b).count(); };
-
-
-
-
 
 int main(int argc, char* argv[]) {
 	std::ios_base::sync_with_stdio(false);
@@ -40,13 +38,27 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 
+		lir::AST ast = lir::parser::run(files);
 
-		// Run the lexer.
-		while (not tok.eof()) {
-			tok = lir::lexer::run(files);
-			// lir::println("[L] -> ", tok);  // Print tokens (don't use this for big files.)
+		if constexpr(debug_mode) {
+			std::cout << "[T] -> " << ast << std::endl;
 		}
 
+		auto result = lir::backend::treewalk::interpret(ast);
+
+		if constexpr(debug_mode) {
+			std::cout << "[R] -> "
+					<< lir::colour::bg::normal
+					<< lir::colour::fg::black
+					<< "["
+					<< lir::colour::bg::black
+					<< lir::colour::fg::normal
+					<< result
+					<< lir::colour::bg::normal
+					<< lir::colour::fg::black
+					<< "]"
+					<< std::endl;
+		}
 
 	// Just catch any error.
 	} catch (const std::exception& e) {

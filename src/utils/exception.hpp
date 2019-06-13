@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 #include <stdexcept>
 
 #include <utils/logger.hpp>
@@ -15,14 +16,26 @@
 			: std::runtime_error(m) {}                     \
 		name(const std::string& m, const lir::Position& p) \
 			: std::runtime_error(m), pos(p) {}             \
+		name(const lir::Position& p)                       \
+			: std::runtime_error(default_msg), pos(p) {}   \
 		name()                                             \
 			: std::runtime_error(default_msg) {}           \
 	};
 
+namespace lir {
+	template<typename... Ts> inline std::string make_str(Ts&&... args) {
+		std::stringstream ss;
+		(ss << ... << std::forward<Ts&&>(args));
+		return ss.str();
+	}
+}
 
-#define NEW_THROWER(name, type)                                                   \
-	template <typename... Ts> void name(const lir::Position& pos, Ts&&... args) { \
-		throw type(((std::string{args}) + ...), pos);                             \
+#define NEW_THROWER(name, type)                                                          \
+	template <typename... Ts> inline void name(const lir::Position& pos, Ts&&... args) { \
+		throw type(lir::make_str(std::forward<Ts&&>(args)...), pos);                     \
+	}																			         \
+	inline void name(const lir::Position& pos) {                                         \
+		throw type(pos);                                                                 \
 	}
 
 
@@ -33,6 +46,12 @@
 
 
 namespace lir::except {
+
+	NEW_EXCEPTION_TYPE(Unreachable, "code marked as unreachable has been called!")
+
+	NEW_CATCHER(catch_unreachable, Unreachable, "unreachable code", lir::errorln)
+	
+	NEW_THROWER(throw_unreachable, Unreachable)
 
 	namespace lexer {
 		NEW_EXCEPTION_TYPE(LexerNotice,  "lexer notice!")
