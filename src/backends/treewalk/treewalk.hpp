@@ -93,10 +93,9 @@ inline std::ostream& operator<<(std::ostream& os, const lir::backend::treewalk::
 	if(auto d = std::get_if<double>(&value)) {
 		os << *d;
 	} else if(auto b = std::get_if<bool>(&value)) {
-		constexpr auto true_false = std::array<const char*, 2>{"true", "false"};
-		os << true_false[*b];
+		os << (std::array<const char*, 2>{"true", "false"}[*b]);
 	} else {
-		throw std::runtime_error("UNREACHABLE");
+		lir::except::throw_unreachable({__LINE__, 0, __func__});
 	}
 	return os;
 }
