@@ -13,7 +13,7 @@ WFLAGS=-Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-opt
 
 
 GENERAL_FLAGS=-msse2 -march=native -m64
-RELEASE_FLAGS=$(GENERAL_FLAGS) -Ofast -finline-limit=200 -fipa-pta -fwhole-program -fsplit-loops -funswitch-loops
+RELEASE_FLAGS=$(GENERAL_FLAGS) -Ofast -finline-limit=200 -fipa-pta -fwhole-program -fsplit-loops -funswitch-loops -DNDEBUG
 DEBUG_FLAGS=$(GENERAL_FLAGS) -O2 -g
 
 

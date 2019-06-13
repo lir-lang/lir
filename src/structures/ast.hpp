@@ -71,13 +71,13 @@ namespace lir {
 
         std::ostream& os = std::cout;
 
-        void reset() {
+        void reset() const {
             os << lir::style::reset
                << lir::colour::bg::normal
 		       << lir::colour::fg::black;
         }
 
-        void operator()(const lir::expressions::Literal& node) {
+        void operator()(const lir::expressions::Literal& node) const {
             os << lir::colour::bg::black
 		       << lir::colour::fg::normal
                << node.value
@@ -85,7 +85,7 @@ namespace lir {
                << lir::colour::fg::black;
         }
 
-        void operator()(const lir::expressions::Unary& node) {
+        void operator()(const lir::expressions::Unary& node) const {
             os << "(" 
                << lir::style::bold
 		       << lir::colour::fg::bright::yellow
@@ -99,7 +99,7 @@ namespace lir {
             os << ")";
         }
 
-        void operator()(const lir::expressions::Binary& node) {
+        void operator()(const lir::expressions::Binary& node) const {
             os << "(" 
                << lir::style::bold
 		       << lir::colour::fg::bright::yellow
@@ -117,7 +117,7 @@ namespace lir {
             os << ")";
         }
 
-        void operator()(const lir::expressions::Grouping& node) {
+        void operator()(const lir::expressions::Grouping& node) const {
             os << "(" 
                << lir::style::bold
 		       << lir::colour::fg::bright::yellow
@@ -131,7 +131,7 @@ namespace lir {
             os << ")";
         }
 
-        void print(const lir::AST& ast) {
+        void print(const lir::AST& ast) const {
             reset();
             return std::visit(*this, *ast);
         }

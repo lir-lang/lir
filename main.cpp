@@ -2,7 +2,9 @@
 // #include <modules/cxxopts.hpp>
 #include <lir.hpp>
 
-#include <backends/treewalk/treewalk.hpp>
+// Basic compile time flags
+constexpr bool debug_mode = false;
+
 
 // Convenience.
 using timer = std::chrono::high_resolution_clock;
@@ -37,22 +39,26 @@ int main(int argc, char* argv[]) {
 		}
 
 		lir::AST ast = lir::parser::run(files);
-		//lir::println("[T] -> ", ast);
-		std::cout << ast << std::endl;
+
+		if constexpr(debug_mode) {
+			std::cout << "[T] -> " << ast << std::endl;
+		}
 
 		auto result = lir::backend::treewalk::interpret(ast);
 
-		std::cout << "[R] -> "
-				  << lir::colour::bg::normal
-              	  << lir::colour::fg::black
-				  << "["
-				  << lir::colour::bg::black
-		      	  << lir::colour::fg::normal
-				  << result
-				  << lir::colour::bg::normal
-              	  << lir::colour::fg::black
-				  << "]"
-				  << std::endl;
+		if constexpr(debug_mode) {
+			std::cout << "[R] -> "
+					<< lir::colour::bg::normal
+					<< lir::colour::fg::black
+					<< "["
+					<< lir::colour::bg::black
+					<< lir::colour::fg::normal
+					<< result
+					<< lir::colour::bg::normal
+					<< lir::colour::fg::black
+					<< "]"
+					<< std::endl;
+		}
 
 	// Just catch any error.
 	} catch (const std::exception& e) {
