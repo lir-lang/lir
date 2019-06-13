@@ -1,7 +1,6 @@
 #pragma once
 
-#include "token_types.hpp"
-#include "visitor.hpp"
+#include <structures/token_types.hpp>
 
 #include <variant>
 #include <string>

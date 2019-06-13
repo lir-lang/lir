@@ -119,12 +119,7 @@ namespace lir::parser {
 
 	// Parses files and returns AST
 	lir::AST run(lir::FileStack& files) {
-		State state = { .previous    = {},
-						.current     = {}, 
-						.files       = files,
-						.prefix_node = nullptr,
-						.infix_node  = nullptr,
-						.debug_mode  = false };
+		State state {files};
 		
 		advance(state);
 		AST ast = expression(state);

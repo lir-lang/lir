@@ -8,15 +8,18 @@ namespace lir::parser {
 
 	// Parser state passed throughout the parser internally
 	struct State {
+		State(FileStack& fs)
+			: files(fs) {}
+
 		Token previous;
 		Token current;
 
 		FileStack& files;
 
-		lir::AST prefix_node;
-		lir::AST infix_node;
+		lir::AST prefix_node = nullptr;
+		lir::AST infix_node  = nullptr;
 
-		bool debug_mode;
+		bool debug_mode = false;
 	};
 
 	// Gets next token
