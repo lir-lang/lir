@@ -4,7 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <utils/logger.hpp>
+#include <tinge.hpp>
 #include <structures/position.hpp>
 
 
@@ -40,7 +40,7 @@ namespace lir {
 
 
 #define NEW_CATCHER(name, type, str, func) \
-	void name(const type& arg) { func(arg.pos, " -> ", lir::style::bold, str, lir::style::reset, "\n\t", arg.what()); }
+	void name(const type& arg) { func(arg.pos, " -> ", tinge::style::bold, str, tinge::reset, "\n\t", arg.what()); }
 
 
 
@@ -48,9 +48,7 @@ namespace lir {
 namespace lir::except {
 
 	NEW_EXCEPTION_TYPE(Unreachable, "code marked as unreachable has been called!")
-
-	NEW_CATCHER(catch_unreachable, Unreachable, "unreachable code", lir::errorln)
-	
+	NEW_CATCHER(catch_unreachable, Unreachable, "unreachable code", tinge::errorln)
 	NEW_THROWER(throw_unreachable, Unreachable)
 
 	namespace lexer {
@@ -59,10 +57,10 @@ namespace lir::except {
 		NEW_EXCEPTION_TYPE(LexerSuccess, "lexer success!")
 		NEW_EXCEPTION_TYPE(LexerError,   "lexer error!")
 
-		NEW_CATCHER(catch_notice,  LexerNotice,  "lexer notice",  lir::noticeln)
-		NEW_CATCHER(catch_warn,    LexerWarn,    "lexer warning", lir::warnln)
-		NEW_CATCHER(catch_success, LexerSuccess, "lexer success", lir::successln)
-		NEW_CATCHER(catch_error,   LexerError,   "lexer error",   lir::errorln)
+		NEW_CATCHER(catch_notice,  LexerNotice,  "lexer notice",  tinge::noticeln)
+		NEW_CATCHER(catch_warn,    LexerWarn,    "lexer warning", tinge::warnln)
+		NEW_CATCHER(catch_success, LexerSuccess, "lexer success", tinge::successln)
+		NEW_CATCHER(catch_error,   LexerError,   "lexer error",   tinge::errorln)
 
 		NEW_THROWER(throw_notice,  LexerNotice)
 		NEW_THROWER(throw_warn,    LexerWarn)
@@ -76,10 +74,10 @@ namespace lir::except {
 		NEW_EXCEPTION_TYPE(PreprocessorSuccess, "preprocessor success!")
 		NEW_EXCEPTION_TYPE(PreprocessorError,   "preprocessor error!")
 
-		NEW_CATCHER(catch_notice,  PreprocessorNotice,  "preprocessor notice",  lir::noticeln)
-		NEW_CATCHER(catch_warn,    PreprocessorWarn,    "preprocessor warning", lir::warnln)
-		NEW_CATCHER(catch_success, PreprocessorSuccess, "preprocessor success", lir::successln)
-		NEW_CATCHER(catch_error,   PreprocessorError,   "preprocessor error",   lir::errorln)
+		NEW_CATCHER(catch_notice,  PreprocessorNotice,  "preprocessor notice",  tinge::noticeln)
+		NEW_CATCHER(catch_warn,    PreprocessorWarn,    "preprocessor warning", tinge::warnln)
+		NEW_CATCHER(catch_success, PreprocessorSuccess, "preprocessor success", tinge::successln)
+		NEW_CATCHER(catch_error,   PreprocessorError,   "preprocessor error",   tinge::errorln)
 
 		NEW_THROWER(throw_notice,  PreprocessorNotice)
 		NEW_THROWER(throw_warn,    PreprocessorWarn)
@@ -93,10 +91,10 @@ namespace lir::except {
 		NEW_EXCEPTION_TYPE(ParserSuccess, "parser success!")
 		NEW_EXCEPTION_TYPE(ParserError,   "parser error!")
 
-		NEW_CATCHER(catch_notice,  ParserNotice,  "parser notice",  lir::noticeln)
-		NEW_CATCHER(catch_warn,    ParserWarn,    "parser warning", lir::warnln)
-		NEW_CATCHER(catch_success, ParserSuccess, "parser success", lir::successln)
-		NEW_CATCHER(catch_error,   ParserError,   "parser error",   lir::errorln)
+		NEW_CATCHER(catch_notice,  ParserNotice,  "parser notice",  tinge::noticeln)
+		NEW_CATCHER(catch_warn,    ParserWarn,    "parser warning", tinge::warnln)
+		NEW_CATCHER(catch_success, ParserSuccess, "parser success", tinge::successln)
+		NEW_CATCHER(catch_error,   ParserError,   "parser error",   tinge::errorln)
 
 		NEW_THROWER(throw_notice,  ParserNotice)
 		NEW_THROWER(throw_warn,    ParserWarn)

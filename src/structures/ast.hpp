@@ -33,7 +33,7 @@ namespace lir {
             std::string value;
         };
 
-        // Unary operators such as - 
+        // Unary operators such as -
         struct Unary {
             Unary(TokenType o, std::unique_ptr<Expression>& expr)
                 : op(o), expression(std::move(expr)) {}
@@ -56,7 +56,7 @@ namespace lir {
         struct Grouping {
             Grouping(std::unique_ptr<Expression>& expr)
                 : expression(std::move(expr)) {}
-            
+
             std::unique_ptr<Expression> expression;
         };
 
@@ -71,26 +71,26 @@ namespace lir {
         std::ostream& os = std::cout;
 
         void reset() const {
-            os << lir::style::reset
-               << lir::colour::bg::normal
-		       << lir::colour::fg::black;
+            os << tinge::reset
+               << tinge::bg::reset
+		       << tinge::fg::black;
         }
 
         void operator()(const lir::expressions::Literal& node) const {
-            os << lir::colour::bg::black
-		       << lir::colour::fg::normal
+            os << tinge::bg::black
+		       << tinge::fg::reset
                << node.value
-               << lir::colour::bg::normal
-               << lir::colour::fg::black;
+               << tinge::bg::reset
+               << tinge::fg::black;
         }
 
         void operator()(const lir::expressions::Unary& node) const {
-            os << "(" 
-               << lir::style::bold
-		       << lir::colour::fg::bright::yellow
+            os << "("
+               << tinge::style::bold
+		       << tinge::fg::bright::yellow
                << std::string(lir::Tokens::to_str[node.op])
-               << lir::style::reset
-		       << lir::colour::fg::black
+               << tinge::reset
+		       << tinge::fg::black
                << " ";
 
             print(node.expression);
@@ -99,12 +99,12 @@ namespace lir {
         }
 
         void operator()(const lir::expressions::Binary& node) const {
-            os << "(" 
-               << lir::style::bold
-		       << lir::colour::fg::bright::yellow
+            os << "("
+               << tinge::style::bold
+		       << tinge::fg::bright::yellow
                << std::string(lir::Tokens::to_str[node.op])
-               << lir::style::reset
-		       << lir::colour::fg::black
+               << tinge::reset
+		       << tinge::fg::black
                << " ";
 
             print(node.left);
@@ -117,12 +117,12 @@ namespace lir {
         }
 
         void operator()(const lir::expressions::Grouping& node) const {
-            os << "(" 
-               << lir::style::bold
-		       << lir::colour::fg::bright::yellow
+            os << "("
+               << tinge::style::bold
+		       << tinge::fg::bright::yellow
                << "group"
-               << lir::style::reset
-		       << lir::colour::fg::black
+               << tinge::reset
+		       << tinge::fg::black
                << " ";
 
             print(node.expression);
@@ -134,7 +134,7 @@ namespace lir {
             reset();
             return std::visit(*this, *ast);
         }
-        
+
     };
 
 }

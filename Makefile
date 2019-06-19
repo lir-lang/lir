@@ -1,7 +1,7 @@
 CXX=g++
 STD=c++17
 
-INCLUDE=-Isrc -I.
+INCLUDE=-Isrc -I. -Imodules/tinge/
 LIBS=-pthread -lstdc++fs
 
 BUILD_DIR=build
@@ -12,7 +12,7 @@ TARGET=lir
 WFLAGS=-Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo -Wstrict-overflow=5 -Wundef -Wno-unused
 
 
-GENERAL_FLAGS=-msse2 -march=native -m64
+GENERAL_FLAGS=-msse2 -march=native -mtune=native -m64
 RELEASE_FLAGS=$(GENERAL_FLAGS) -Ofast -finline-limit=200 -fipa-pta -fwhole-program -fsplit-loops -funswitch-loops -DNDEBUG
 DEBUG_FLAGS=$(GENERAL_FLAGS) -O2 -g
 

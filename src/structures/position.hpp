@@ -32,7 +32,7 @@ namespace lir {
 
 	std::ostream& operator<<(std::ostream& os, const lir::Position& pos) {
 		const auto& [line, column, file] = pos;
-		return (os << "[ " << lir::style::bold << line << ": " << column << lir::style::reset << " ]" << " in '" << lir::colour::bg::black << file << lir::colour::bg::normal << '\'');
+		return (os << "[ " << tinge::style::bold << line << ": " << column << tinge::reset << " ]" << " in '" << tinge::bg::black << file << tinge::bg::reset << '\'');
 	}
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <utils/logger.hpp>
+#include <tinge.hpp>
 #include <structures/view.hpp>
 #include <structures/token_types.hpp>
 
@@ -85,20 +85,20 @@ namespace lir {
 		std::string str(longest_token_name - type.size(), '.');
 
 
-		os << lir::style::bold
-		<< lir::colour::fg::bright::yellow
+		os << tinge::style::bold
+		<< tinge::fg::bright::yellow
 		<< type
-		<< lir::style::reset
-		<< lir::colour::fg::black
+		<< tinge::reset
+		<< tinge::fg::black
 		<< str
 		<< "["
-		<< lir::colour::bg::black
-		<< lir::colour::fg::normal
+		<< tinge::bg::black
+		<< tinge::fg::reset
 		<< view
-		<< lir::colour::bg::normal
-		<< lir::colour::fg::black
+		<< tinge::bg::reset
+		<< tinge::fg::black
 		<< "]"
-		<< lir::colour::bg::normal;
+		<< tinge::bg::reset;
 
 		return os;
 	}

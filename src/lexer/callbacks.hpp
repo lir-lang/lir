@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utils/logger.hpp>
+#include <tinge.hpp>
 #include <structures/token_types.hpp>
 #include <structures/token.hpp>
 #include <structures/view.hpp>

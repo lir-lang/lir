@@ -29,7 +29,7 @@ namespace lir::parser {
 		state.current = lexer::run(state.files);
 
 		if(state.debug_mode)
-			lir::println("[L] -> ", state.current);
+			tinge::println("[L] -> ", state.current);
 	}
 
 	// Consumes next token, if incorrect token, throws error
