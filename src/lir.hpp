@@ -1,9 +1,7 @@
 #pragma once
 
-
-#include <utils/utils.hpp>
+#include <exceptions.hpp>
+#include <io/io.hpp>
 #include <structures/structures.hpp>
-#include <preprocessor/preprocessor.hpp>
-#include <lexer/lexer.hpp>
-#include <parser/parser.hpp>
-#include <backends/treewalk/treewalk.hpp>
+#include <frontend/frontend.hpp>
+#include <backend/backend.hpp>

@@ -1,10 +1,6 @@
 #include <chrono>
-// #include <modules/cxxopts.hpp>
+#include <iostream>
 #include <lir.hpp>
-
-// Basic compile time flags
-constexpr bool debug_mode = false;
-
 
 // Convenience.
 using timer = std::chrono::high_resolution_clock;
@@ -20,15 +16,8 @@ int main(int argc, char* argv[]) {
 	auto start = timer::now();
 
 
-
-	// Handle arguments.
-	// ...
-
-
-
 	try {
 		lir::FileStack files;
-		lir::Token tok;
 
 		try {
 			files.newfile(argv[1]);
@@ -38,39 +27,14 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 
-		while (not tok.eof())
-			tok = lir::lexer::run(files);
-
-		// lir::AST ast = lir::parser::run(files);
-
-		// if constexpr(debug_mode) {
-		// 	std::cout << "[T] -> " << ast << std::endl;
-		// }
-
-		// auto result = lir::backend::treewalk::interpret(ast);
-
-		// if constexpr(debug_mode) {
-		// 	std::cout << "[R] -> "
-		// 			<< tinge::bg::normal
-		// 			<< tinge::fg::black
-		// 			<< "["
-		// 			<< tinge::bg::black
-		// 			<< tinge::fg::normal
-		// 			<< result
-		// 			<< tinge::bg::normal
-		// 			<< tinge::fg::black
-		// 			<< "]"
-		// 			<< std::endl;
-		// }
+		// lir::AST ast = lir::run(files);
 
 	// Just catch any error.
 	} catch (const std::exception& e) {
 		tinge::errorln_em("error: ", e.what());
 	}
 
-
 	tinge::successln_em(diff<std::chrono::milliseconds>(timer::now(), start), "ms");
-
 
 	return 0;
 }

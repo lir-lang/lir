@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <tinge.hpp>
 #include <structures/view.hpp>
-#include <structures/token_types.hpp>
+#include <frontend/lexer/structures/token_types.hpp>
 
 namespace lir {
 

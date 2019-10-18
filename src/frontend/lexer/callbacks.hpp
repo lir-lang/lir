@@ -1,10 +1,10 @@
 #pragma once
 
 #include <tinge.hpp>
-#include <structures/token_types.hpp>
-#include <structures/token.hpp>
+#include <frontend/lexer/structures/token_types.hpp>
+#include <frontend/lexer/structures/token.hpp>
 #include <structures/view.hpp>
-#include <preprocessor/preprocessor.hpp>
+#include <frontend/preprocessor/preprocessor.hpp>
 
 namespace lir::lexer {
 	namespace Type = lir::Tokens;
