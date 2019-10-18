@@ -4,16 +4,15 @@
 #include <deque>
 #include <vector>
 #include <utility> // std::forward
-#include <file/file.hpp>
+
+#include <io/io.hpp>
 #include <structures/view.hpp>
-#include <structures/position.hpp>
 
 namespace lir {
 
 	struct FileView {
 		lir::File file;
 		lir::View view;
-		lir::Position pos;
 
 		// Create a new file object here and store it.
 		FileView(const std::string& fname)
@@ -72,12 +71,6 @@ namespace lir {
 			const decltype(FileView::file)& file() const {
 				return top().file;
 			}
-
-			const lir::Position& pos() const {
-				return top().pos;
-			}
-
-
 
 
 			// Add a new file to the stack.

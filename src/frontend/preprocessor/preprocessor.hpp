@@ -3,9 +3,10 @@
 #include <string>
 #include <filesystem>
 #include <tinge.hpp>
+
 #include <structures/view.hpp>
-#include <structures/file_stack.hpp>
-#include <lexer/common.hpp>
+#include <io/io.hpp>
+#include <frontend/lexer/lexer.hpp>
 
 namespace lir::preprocessor {
 

@@ -26,9 +26,6 @@ namespace lir {
 	};
 
 
-
-
-
 	File::File(const std::string& fname) {
 		namespace fs = std::filesystem;
 

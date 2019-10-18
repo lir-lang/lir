@@ -1,10 +1,10 @@
 #pragma once
 
 #include <structures/view.hpp>
-#include <structures/token_types.hpp>
-#include <structures/token.hpp>
-#include <structures/file_stack.hpp>
-#include <utils/char.hpp>
+#include <frontend/lexer/utils/char.hpp>
+#include <frontend/lexer/structures/token_types.hpp>
+#include <frontend/lexer/structures/token.hpp>
+#include <io/structures/file_stack.hpp>
 
 namespace lir::lexer {
 
